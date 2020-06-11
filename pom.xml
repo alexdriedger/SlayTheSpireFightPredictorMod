@@ -12,14 +12,17 @@
         <SlayTheSpire.version>01-23-2019</SlayTheSpire.version>
         <ModTheSpire.version>3.8.0</ModTheSpire.version>
         <Steam.path>C:/Program Files (x86)/Steam/steamapps</Steam.path>
-
-        <!-- Dependencies for running the neural network  -->
-        <dl4j.version>1.0.0-beta7</dl4j.version>
-        <nd4j.version>1.0.0-beta7</nd4j.version>
-        <logback.version>1.2.3</logback.version>
-        <java.version>1.8</java.version>
-        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>tensorflow-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -44,19 +47,9 @@
             <systemPath>${Steam.path}/workshop/content/646570/1605833019/BaseMod.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-core</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
-            <version>${nd4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow-core-platform</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

@@ -68,6 +68,13 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <snapshots />
+      <id>tensorflow-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>com.megacrit.cardcrawl</groupId>
@@ -92,15 +99,10 @@
     </dependency>
   </dependencies>
   <properties>
-    <java.version>1.8</java.version>
-    <Steam.path>C:/Program Files (x86)/Steam/steamapps</Steam.path>
-    <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <nd4j.version>1.0.0-beta7</nd4j.version>
     <ModTheSpire.version>3.8.0</ModTheSpire.version>
-    <logback.version>1.2.3</logback.version>
-    <dl4j.version>1.0.0-beta7</dl4j.version>
+    <Steam.path>C:/Program Files (x86)/Steam/steamapps</Steam.path>
     <maven.compiler.source>1.8</maven.compiler.source>
     <SlayTheSpire.version>01-23-2019</SlayTheSpire.version>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 </project>
