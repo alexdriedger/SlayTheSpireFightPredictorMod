@@ -2,20 +2,19 @@ package FightPredictor.ml;
 
 import FightPredictor.FightPredictor;
 import org.tensorflow.SavedModelBundle;
-import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.proto.framework.SignatureDef;
 import org.tensorflow.proto.framework.TensorInfo;
 import org.tensorflow.tools.ndarray.FloatNdArray;
-import org.tensorflow.tools.ndarray.StdArrays;
 import org.tensorflow.types.TFloat32;
+import org.tensorflow.tools.ndarray.StdArrays;
 
 import java.util.List;
 import java.util.Map;
 
 public class Model {
 
-    private static final int NUM_FEATURES = 975;
+    public static final int NUM_FEATURES = 975;
 
     SavedModelBundle model;
     String inputOp;

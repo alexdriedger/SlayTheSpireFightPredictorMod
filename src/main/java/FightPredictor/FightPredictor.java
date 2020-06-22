@@ -1,12 +1,19 @@
 package FightPredictor;
 
 import FightPredictor.ml.Model;
+import FightPredictor.ml.ModelUtils;
 import FightPredictor.util.FileUtils;
 import FightPredictor.util.IDCheckDontTouchPls;
 import basemod.BaseMod;
+import basemod.interfaces.OnStartBattleSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
+import com.badlogic.gdx.Gdx;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
+import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.relics.AbstractRelic;
+import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,10 +22,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 
 @SpireInitializer
 public class FightPredictor implements
-    PostInitializeSubscriber
+    PostInitializeSubscriber,
+    OnStartBattleSubscriber
 {
     public static final Logger logger = LogManager.getLogger(FightPredictor.class.getName());
     private static String modID;
@@ -56,6 +65,10 @@ public class FightPredictor implements
     public static String makeID(String idText) {
         return getModID() + ":" + idText;
     }
+
+    public static String loadJson(String jsonPath) {
+        return Gdx.files.internal(jsonPath).readString(String.valueOf(StandardCharsets.UTF_8));
+    }
     
     @SuppressWarnings("unused")
     public static void initialize() {
@@ -66,6 +79,7 @@ public class FightPredictor implements
 
     @Override
     public void receivePostInitialize() {
+        ModelUtils.init();
         logger.info("Initializing tensorflow model");
         try {
             Path modelPath = FileUtils.createTempModelResourceDir();
@@ -81,5 +95,25 @@ public class FightPredictor implements
         logger.info("Expected 0.0118. Got " + model.predict(testCase1));
         logger.info("Expected 0.0027. Got " + model.predict(testCase2));
         logger.info("Expected 0.0437. Got " + model.predict(testCase3));
+    }
+
+
+    @Override
+    public void receiveOnBattleStart(AbstractRoom abstractRoom) {
+        List<AbstractCard> masterDeck = AbstractDungeon.player.masterDeck.group;
+        List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
+        String encounter = AbstractDungeon.lastCombatMetricKey;
+        String character = AbstractDungeon.player.chosenClass.name();
+        int maxHP = AbstractDungeon.player.maxHealth;
+        int enteringHP = AbstractDungeon.player.currentHealth;
+//        int ascension = AbstractDungeon.ascensionLevel; // This is what should be used but there is no data outside of asc 20
+        int ascension = 20;
+        int floor = AbstractDungeon.floorNum;
+        boolean potionUsed = false;
+
+        float[] inputVector = ModelUtils.getInputVector(masterDeck, masterRelics, encounter, character, maxHP, enteringHP, ascension, floor, potionUsed);
+        float prediction = model.predict(inputVector);
+        float intPrediction = Math.round(prediction * 100);
+        logger.info("Expected health loss: " + intPrediction);
     }
 }
