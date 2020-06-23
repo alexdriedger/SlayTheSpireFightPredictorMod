@@ -47,11 +47,6 @@
             <systemPath>${Steam.path}/workshop/content/646570/1605833019/BaseMod.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.12.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow-core-platform</artifactId>
             <version>0.1.0-SNAPSHOT</version>
@@ -60,6 +55,11 @@
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow-tools</artifactId>
             <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.12.2</version>
         </dependency>
     </dependencies>
 

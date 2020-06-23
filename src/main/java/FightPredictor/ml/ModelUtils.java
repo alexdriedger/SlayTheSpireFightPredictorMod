@@ -94,4 +94,11 @@ public class ModelUtils {
 
         return outputVector;
     }
+
+    public static float[] changeEncounter(float[] vector, String encounter) {
+        float[] vecCopy = Arrays.copyOf(vector, vector.length);
+        Arrays.fill(vecCopy, cardCount + relicCount, cardCount + relicCount + encountersCount, 0.0f);
+        vecCopy[encounterEncoding.get(encounter) + cardCount + relicCount] += 1;
+        return vecCopy;
+    }
 }
