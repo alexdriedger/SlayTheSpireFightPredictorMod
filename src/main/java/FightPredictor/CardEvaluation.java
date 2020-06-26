@@ -35,6 +35,9 @@ public class CardEvaluation {
     private Map<String, Float> nextActElitesPredictions;
     private Map<String, Float> nextActBossesPredictions;
 
+    private float currentActScore;
+    private float nextActScore;
+
     // Base vector just needs encounters changed. card should already be in vector
     // cardid is just used for being able to reference this later
     public CardEvaluation(String cardID, float[] baseVector, int actNum) {
@@ -68,6 +71,11 @@ public class CardEvaluation {
             predictions.put(enc, prediction);
         }
         return predictions;
+    }
+
+    public void calculateAgainst(CardEvaluation other) {
+        this.currentActScore = (other.getCurrentActAvg() - this.getCurrentActAvg()) * 100f;
+        this.nextActScore = (other.getNextActAvg() - this.getNextActAvg()) * 100f;
     }
 
     public float getCurrentActAvg() {
@@ -111,5 +119,13 @@ public class CardEvaluation {
 
     public Map<String, Float> getNextActBossesPredictions() {
         return nextActBossesPredictions;
+    }
+
+    public float getCurrentActScore() {
+        return currentActScore;
+    }
+
+    public float getNextActScore() {
+        return nextActScore;
     }
 }

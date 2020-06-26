@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpireInitializer
 public class FightPredictor implements
@@ -33,12 +35,16 @@ public class FightPredictor implements
     private static String modID;
 
     public static Model model;
+
+    public static Map<AbstractCard, CardEvaluation> cardEvaluations;
     
     public FightPredictor() {
         logger.info("Subscribe to BaseMod hooks");
         
         BaseMod.subscribe(this);
         setModID("FightPredictor");
+
+        cardEvaluations = new HashMap<>();
 
         logger.info("Done subscribing");
     }
