@@ -57,6 +57,12 @@ public class ModelUtils {
         return cardId;
     }
 
+    /**
+     * Returns the input vector reflecting the current game state. The encounter is set to
+     * the last combat encounter. Use changeEncounter to change the encounter.
+     *
+     * @return input vector
+     */
     public static float[] getBaseInputVector() {
         List<AbstractCard> masterDeck = AbstractDungeon.player.masterDeck.group;
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
@@ -69,6 +75,13 @@ public class ModelUtils {
         return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
     }
 
+    /**
+     * Returns the base input vector with the given card added to the vector. The encounter is set to
+     * the last combat encounter. Use changeEncounter to change the encounter.
+     *
+     * @param c Card to add to the vector
+     * @return input vector
+     */
     public static float[] getInputVector(AbstractCard c) {
         List<AbstractCard> masterDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
         masterDeck.add(c);
@@ -82,6 +95,18 @@ public class ModelUtils {
         return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
     }
 
+    /**
+     * Returns an input vector that can be used by the Model
+     *
+     * @param masterDeck
+     * @param masterRelics
+     * @param encounter
+     * @param maxHP
+     * @param enteringHP
+     * @param ascension
+     * @param potionUsed
+     * @return input vector
+     */
     public static float[] getInputVector(List<AbstractCard> masterDeck, List<AbstractRelic> masterRelics, String encounter,
                                          int maxHP, int enteringHP, int ascension, boolean potionUsed) {
         float[] outputVector = new float[Model.NUM_FEATURES];

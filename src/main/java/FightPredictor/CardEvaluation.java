@@ -38,6 +38,8 @@ public class CardEvaluation {
     private float currentActScore;
     private float nextActScore;
 
+    // TODO : CHANGE THIS TO BE MORE GENERAL. STATE EVALUATION? DEFINITELY REMOVE cardID
+
     // Base vector just needs encounters changed. card should already be in vector
     // cardid is just used for being able to reference this later
     public CardEvaluation(String cardID, float[] baseVector, int actNum) {
@@ -55,10 +57,17 @@ public class CardEvaluation {
         }
     }
 
+    /**
+     * Get an evaluation of the current game state
+     */
     public CardEvaluation() {
         this(SKIP, ModelUtils.getBaseInputVector(), AbstractDungeon.actNum);
     }
 
+    /**
+     * Get an evaluation of the current game state with the addition of a single card
+     * @param c Card to add
+     */
     public CardEvaluation(AbstractCard c) {
         this(c.cardID, ModelUtils.getInputVector(c), AbstractDungeon.actNum);
     }
@@ -73,9 +82,16 @@ public class CardEvaluation {
         return predictions;
     }
 
+    /**
+     * Calculate a score against another game state.
+     * Score = Avg damage taken in other elite & boss fights - Avg damage taken in this elite & boss fights
+     * @param other game state to compare against
+     */
     public void calculateAgainst(CardEvaluation other) {
         this.currentActScore = (other.getCurrentActAvg() - this.getCurrentActAvg()) * 100f;
-        this.nextActScore = (other.getNextActAvg() - this.getNextActAvg()) * 100f;
+        if (this.hasNextActPredictions) {
+            this.nextActScore = (other.getNextActAvg() - this.getNextActAvg()) * 100f;
+        }
     }
 
     public float getCurrentActAvg() {

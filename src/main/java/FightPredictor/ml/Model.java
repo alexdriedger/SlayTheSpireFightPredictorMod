@@ -86,7 +86,8 @@ public class Model {
         }
     }
 
-    public float[] predict(float[][] inputMatrix) {
-        return new float[]{};
-    }
+    // TODO : IMPLEMENT MATRIX PREDICTION
+//    public float[] predict(float[][] inputMatrix) {
+//        throw new RuntimeException("Method not implemented");
+//    }
 }

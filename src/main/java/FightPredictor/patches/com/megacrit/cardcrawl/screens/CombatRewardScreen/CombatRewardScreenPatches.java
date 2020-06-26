@@ -16,22 +16,25 @@ public class CombatRewardScreenPatches {
     @SpirePatch(clz = CombatRewardScreen.class, method = "setupItemReward")
     public static class EvaluateCardRewards {
         public static void Postfix(CombatRewardScreen __instance) {
-            List<RewardItem> cardRewards = __instance.rewards.stream()
+            List<AbstractCard> cards = __instance.rewards.stream()
                     .filter(r -> r.type == RewardItem.RewardType.CARD)
+                    .flatMap(r -> r.cards.stream()) // Flatten out all card rewards for prayer wheel
                     .collect(Collectors.toList());
 
             CardEvaluation skip = new CardEvaluation();
 
-            List<AbstractCard> cards = cardRewards.stream()
-                    .flatMap(r -> r.cards.stream())
-                    .collect(Collectors.toList());
-
             FightPredictor.cardEvaluations.clear();
+
+            // Evaluate cards
             for (AbstractCard c : cards) {
                 CardEvaluation ce = new CardEvaluation(c);
                 ce.calculateAgainst(skip);
                 FightPredictor.cardEvaluations.put(c, ce);
-                FightPredictor.logger.info(ce.getCardID() + ". This Act => " + ce.getCurrentActScore() + ". Next Act => " + ce.getNextActScore());
+
+                FightPredictor.logger.info(ce.getCardID() + ". This Act => " + ce.getCurrentActScore());
+                if (ce.hasNextActPredictions()) {
+                    FightPredictor.logger.info(ce.getCardID() + ". Next Act => " + ce.getNextActScore());
+                }
             }
 
         }
