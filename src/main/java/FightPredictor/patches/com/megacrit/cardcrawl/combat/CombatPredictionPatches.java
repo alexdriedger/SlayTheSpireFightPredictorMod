@@ -8,10 +8,12 @@ import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.blights.AbstractBlight;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
@@ -22,10 +24,7 @@ public class CombatPredictionPatches {
     public static int combatHPLossPrediction = 0;
     public static int combatStartingHP = 0;
 
-    private static String predictionText = "Prediction: ";
-    private static String realText = "Actual: ";
-    private static String damage = " damage";
-    private static String healed = " healed";
+    private static UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.COMBAT_PREDICTION_PANEL_ID);
 
     @SpirePatch(clz = AbstractRoom.class, method = "render")
     public static class RenderCall {
@@ -46,6 +45,10 @@ public class CombatPredictionPatches {
     private static float START_Y = Settings.HEIGHT - (scl(176.0F) + scl(AbstractBlight.RAW_W));
     private static final float BOX_H = scl(75);
     public static void renderPredictionDisplay(SpriteBatch sb) {
+        String predictionText = uiStrings.TEXT[0];
+        String realText = uiStrings.TEXT[1];
+        String damage = uiStrings.TEXT[2];
+
         sb.setColor(Settings.HALF_TRANSPARENT_BLACK_COLOR);
         sb.draw(ImageMaster.WHITE_SQUARE_IMG, START_X, START_Y, scl(450), BOX_H);
         sb.setColor(Color.WHITE);
@@ -63,9 +66,9 @@ public class CombatPredictionPatches {
     private static String getPredictionString(String predictionText, String realText, int predictionVal, int realVal, String suffix) {
         String combatNum = getCombatNum(predictionVal);
         String realNum = getRealNum(predictionVal, realVal);
-        return predictionText + " TAB " + combatNum
+        return predictionText + ": TAB " + combatNum
                 + " NL "
-                + realText + " TAB " + realNum;
+                + realText + ": TAB " + realNum;
     }
 
     private static float scl(float val) {
@@ -73,6 +76,8 @@ public class CombatPredictionPatches {
     }
 
     private static String getCombatNum(int prediction) {
+        String damage = uiStrings.TEXT[2];
+        String healed = uiStrings.TEXT[3];
         if (prediction >= 0) {
             return "#r" + prediction + damage;
         } else {
@@ -81,11 +86,11 @@ public class CombatPredictionPatches {
     }
 
     private static String getRealNum(int prediction, int real) {
+        String damage = uiStrings.TEXT[2];
+        String healed = uiStrings.TEXT[3];
         String color;
-        if (real < prediction) {
+        if (real <= prediction) {
             color = "#g";
-        } else if (real == prediction) {
-            color = "";
         } else {
             color = "#r";
         }
@@ -95,23 +100,5 @@ public class CombatPredictionPatches {
         } else {
             return color + (-real) + healed;
         }
-    }
-
-    private static String getWording(String val, boolean isDamage) {
-        if (isDamage) {
-            return val + damage;
-        } else {
-            return healed + val;
-        }
-    }
-
-    private static String formatNum(int num) {
-        String prefix = "";
-        if(num < 0) {
-            prefix = "#g";
-        } else if(num > 0) {
-            prefix = "#r";
-        }
-        return prefix + num;
     }
 }

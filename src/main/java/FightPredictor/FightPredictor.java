@@ -6,6 +6,7 @@ import FightPredictor.patches.com.megacrit.cardcrawl.combat.CombatPredictionPatc
 import FightPredictor.util.FileUtils;
 import FightPredictor.util.IDCheckDontTouchPls;
 import basemod.BaseMod;
+import basemod.interfaces.EditStringsSubscriber;
 import basemod.interfaces.OnStartBattleSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.badlogic.gdx.Gdx;
@@ -14,6 +15,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import org.apache.logging.log4j.LogManager;
@@ -31,10 +33,13 @@ import java.util.Map;
 @SpireInitializer
 public class FightPredictor implements
     PostInitializeSubscriber,
-    OnStartBattleSubscriber
+    OnStartBattleSubscriber,
+    EditStringsSubscriber
 {
     public static final Logger logger = LogManager.getLogger(FightPredictor.class.getName());
     private static String modID;
+
+    public static final String COMBAT_PREDICTION_PANEL_ID = "FightPredictor:Combat Prediction Panel";
 
     public static Model model;
 
@@ -77,12 +82,26 @@ public class FightPredictor implements
     public static String loadJson(String jsonPath) {
         return Gdx.files.internal(jsonPath).readString(String.valueOf(StandardCharsets.UTF_8));
     }
+
+    public static String getResourceDir() {
+        return "FightPredictorResources/";
+    }
     
     @SuppressWarnings("unused")
     public static void initialize() {
         logger.info("========================= Initializing Fight Predictor. Hi. =========================");
         FightPredictor fightPredictor = new FightPredictor();
         logger.info("========================= /Fight Predictor Initialized. Hello World./ =========================");
+    }
+
+    @Override
+    public void receiveEditStrings() {
+        String path = getResourceDir() + "localization/";
+        String language = "eng";
+        path += language;
+
+        BaseMod.loadCustomStringsFile(UIStrings.class,
+                path + "/FightPredictor-UI-Strings.json");
     }
 
     @Override

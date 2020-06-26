@@ -1,0 +1,10 @@
+{
+  "FightPredictor:Combat Prediction Panel": {
+    "TEXT": [
+      "Prediction",
+      "Actual",
+      "damage",
+      "healed"
+    ]
+  }
+}
