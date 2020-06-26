@@ -1,5 +1,7 @@
 package FightPredictor.patches.com.megacrit.cardcrawl.screens.CardRewardScreen;
 
+import FightPredictor.CardEvaluation;
+import FightPredictor.FightPredictor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
@@ -12,10 +14,13 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class RenderValuePatches {
-    private static DecimalFormat twoDecFormat = new DecimalFormat("##.00");
+    private static DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.US);
+    private static DecimalFormat twoDecFormat = new DecimalFormat("##0.00", otherSymbols);
 
     @SpirePatch(clz = CardRewardScreen.class, method = "renderTwitchVotes")
     public static class RemoveTwitchVotes {
@@ -36,10 +41,11 @@ public class RenderValuePatches {
         @SpireInsertPatch(locator = Locator.class)
         public static void patch(CardRewardScreen __instance, SpriteBatch sb) {
             for(AbstractCard c : __instance.rewardGroup) {
-                //TODO: Add check to see if prediction for card exists
-                if (true) {
-                    float curAct = 1.2525f;
-                    float nextAct = -2.33734f;
+                CardEvaluation ce = FightPredictor.cardEvaluations.get(c);
+
+                if (ce != null) {
+                    float curAct = ce.getCurrentActScore();
+                    float nextAct = ce.getNextActScore();
 
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,
