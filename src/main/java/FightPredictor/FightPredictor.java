@@ -2,12 +2,14 @@ package FightPredictor;
 
 import FightPredictor.ml.Model;
 import FightPredictor.ml.ModelUtils;
+import FightPredictor.patches.com.megacrit.cardcrawl.combat.CombatPredictionPatches;
 import FightPredictor.util.FileUtils;
 import FightPredictor.util.IDCheckDontTouchPls;
 import basemod.BaseMod;
 import basemod.interfaces.OnStartBattleSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -118,5 +120,6 @@ public class FightPredictor implements
         float prediction = model.predict(inputVector);
         float intPrediction = Math.round(prediction * 100);
         logger.info("Expected health loss: " + intPrediction);
+        CombatPredictionPatches.combatHPLossPrediction = MathUtils.round(prediction * 100);
     }
 }
