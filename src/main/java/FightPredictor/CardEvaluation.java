@@ -1,7 +1,9 @@
 package FightPredictor;
 
 import FightPredictor.ml.ModelUtils;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import org.apache.logging.log4j.util.Strings;
 
 import java.util.*;
 
@@ -33,6 +35,9 @@ public class CardEvaluation {
     private Map<String, Float> nextActElitesPredictions;
     private Map<String, Float> nextActBossesPredictions;
 
+    private float currentActScore;
+    private float nextActScore;
+
     // Base vector just needs encounters changed. card should already be in vector
     // cardid is just used for being able to reference this later
     public CardEvaluation(String cardID, float[] baseVector, int actNum) {
@@ -50,6 +55,14 @@ public class CardEvaluation {
         }
     }
 
+    public CardEvaluation() {
+        this(SKIP, ModelUtils.getBaseInputVector(), AbstractDungeon.actNum);
+    }
+
+    public CardEvaluation(AbstractCard c) {
+        this(c.cardID, ModelUtils.getInputVector(c), AbstractDungeon.actNum);
+    }
+
     private static Map<String, Float> makePredictions(List<String> encounters, float[] vector) {
         Map<String, Float> predictions = new HashMap<>();
         for (String enc : encounters) {
@@ -58,6 +71,11 @@ public class CardEvaluation {
             predictions.put(enc, prediction);
         }
         return predictions;
+    }
+
+    public void calculateAgainst(CardEvaluation other) {
+        this.currentActScore = (other.getCurrentActAvg() - this.getCurrentActAvg()) * 100f;
+        this.nextActScore = (other.getNextActAvg() - this.getNextActAvg()) * 100f;
     }
 
     public float getCurrentActAvg() {
@@ -83,7 +101,7 @@ public class CardEvaluation {
         return cardID;
     }
 
-    public boolean isHasNextActPredictions() {
+    public boolean hasNextActPredictions() {
         return hasNextActPredictions;
     }
 
@@ -101,5 +119,13 @@ public class CardEvaluation {
 
     public Map<String, Float> getNextActBossesPredictions() {
         return nextActBossesPredictions;
+    }
+
+    public float getCurrentActScore() {
+        return currentActScore;
+    }
+
+    public float getNextActScore() {
+        return nextActScore;
     }
 }

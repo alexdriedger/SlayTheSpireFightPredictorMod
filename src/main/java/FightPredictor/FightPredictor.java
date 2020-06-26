@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpireInitializer
 public class FightPredictor implements
@@ -33,12 +35,16 @@ public class FightPredictor implements
     private static String modID;
 
     public static Model model;
+
+    public static Map<AbstractCard, CardEvaluation> cardEvaluations;
     
     public FightPredictor() {
         logger.info("Subscribe to BaseMod hooks");
         
         BaseMod.subscribe(this);
         setModID("FightPredictor");
+
+        cardEvaluations = new HashMap<>();
 
         logger.info("Done subscribing");
     }
@@ -103,15 +109,12 @@ public class FightPredictor implements
         List<AbstractCard> masterDeck = AbstractDungeon.player.masterDeck.group;
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
         String encounter = AbstractDungeon.lastCombatMetricKey;
-        String character = AbstractDungeon.player.chosenClass.name();
         int maxHP = AbstractDungeon.player.maxHealth;
         int enteringHP = AbstractDungeon.player.currentHealth;
-//        int ascension = AbstractDungeon.ascensionLevel; // This is what should be used but there is no data outside of asc 20
-        int ascension = 20;
-        int floor = AbstractDungeon.floorNum;
+        int ascension = AbstractDungeon.ascensionLevel;
         boolean potionUsed = false;
 
-        float[] inputVector = ModelUtils.getInputVector(masterDeck, masterRelics, encounter, character, maxHP, enteringHP, ascension, floor, potionUsed);
+        float[] inputVector = ModelUtils.getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
         float prediction = model.predict(inputVector);
         float intPrediction = Math.round(prediction * 100);
         logger.info("Expected health loss: " + intPrediction);
