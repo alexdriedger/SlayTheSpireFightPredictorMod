@@ -111,6 +111,7 @@ public class FightPredictor implements
         float prediction = model.predict(ModelUtils.getBaseInputVector());
         float intPrediction = Math.round(prediction * 100);
         logger.info("Expected health loss: " + intPrediction);
+        CombatPredictionPatches.combatStartingHP = AbstractDungeon.player.currentHealth;
         CombatPredictionPatches.combatHPLossPrediction = MathUtils.round(prediction * 100);
     }
 }
