@@ -45,7 +45,10 @@ public class RenderValuePatches {
 
                 if (ce != null) {
                     float curAct = ce.getCurrentActScore();
-                    float nextAct = ce.getNextActScore();
+                    float nextAct = 9999f;
+                     if(ce.hasNextActPredictions()) {
+                         nextAct = ce.getNextActScore();
+                     }
 
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,
@@ -67,7 +70,11 @@ public class RenderValuePatches {
         }
 
         private static String formatNum(double num) {
-            return (num>0?"#g+":"#r") + twoDecFormat.format(num);
+            if(num != 9999f) {
+                return (num>0?"#g+":"#r") + twoDecFormat.format(num);
+            } else {
+                return "#y----";
+            }
         }
     }
 }
