@@ -22,6 +22,10 @@ public class RenderValuePatches {
     private static DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.US);
     private static DecimalFormat twoDecFormat = new DecimalFormat("##0.00", otherSymbols);
 
+    //TODO: Add localization support
+    public static String curActPredictionText = "This act: ";
+    public static String nextActPredictionText = "Next act: ";
+
     @SpirePatch(clz = CardRewardScreen.class, method = "renderTwitchVotes")
     public static class RemoveTwitchVotes {
         @SpirePrefixPatch
@@ -29,10 +33,6 @@ public class RenderValuePatches {
             return SpireReturn.Return(null);
         }
     }
-
-    //TODO: Add localization support
-    public static String curActPredictionText = "This act: ";
-    public static String nextActPredictionText = "Next act: ";
 
     private static float heightBuffer = 15f * Settings.scale;
 
