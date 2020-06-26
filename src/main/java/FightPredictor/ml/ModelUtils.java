@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.localization.RunModStrings;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 
@@ -56,8 +57,33 @@ public class ModelUtils {
         return cardId;
     }
 
+    public static float[] getBaseInputVector() {
+        List<AbstractCard> masterDeck = AbstractDungeon.player.masterDeck.group;
+        List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
+        String encounter = AbstractDungeon.lastCombatMetricKey;
+        int maxHP = AbstractDungeon.player.maxHealth;
+        int enteringHP = AbstractDungeon.player.currentHealth;
+        int ascension = AbstractDungeon.ascensionLevel;
+        boolean potionUsed = false;
+
+        return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
+    }
+
+    public static float[] getInputVector(AbstractCard c) {
+        List<AbstractCard> masterDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
+        masterDeck.add(c);
+        List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
+        String encounter = AbstractDungeon.lastCombatMetricKey;
+        int maxHP = AbstractDungeon.player.maxHealth;
+        int enteringHP = AbstractDungeon.player.currentHealth;
+        int ascension = AbstractDungeon.ascensionLevel;
+        boolean potionUsed = false;
+
+        return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
+    }
+
     public static float[] getInputVector(List<AbstractCard> masterDeck, List<AbstractRelic> masterRelics, String encounter,
-                                         String character, int maxHP, int enteringHP, int ascension, int floor, boolean potionUsed) {
+                                         int maxHP, int enteringHP, int ascension, boolean potionUsed) {
         float[] outputVector = new float[Model.NUM_FEATURES];
 
         List<String> cardIds = masterDeck.stream()

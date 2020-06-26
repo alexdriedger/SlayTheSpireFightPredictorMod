@@ -1,7 +1,9 @@
 package FightPredictor;
 
 import FightPredictor.ml.ModelUtils;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import org.apache.logging.log4j.util.Strings;
 
 import java.util.*;
 
@@ -50,6 +52,14 @@ public class CardEvaluation {
         }
     }
 
+    public CardEvaluation() {
+        this(SKIP, ModelUtils.getBaseInputVector(), AbstractDungeon.actNum);
+    }
+
+    public CardEvaluation(AbstractCard c) {
+        this(c.cardID, ModelUtils.getInputVector(c), AbstractDungeon.actNum);
+    }
+
     private static Map<String, Float> makePredictions(List<String> encounters, float[] vector) {
         Map<String, Float> predictions = new HashMap<>();
         for (String enc : encounters) {
@@ -83,7 +93,7 @@ public class CardEvaluation {
         return cardID;
     }
 
-    public boolean isHasNextActPredictions() {
+    public boolean hasNextActPredictions() {
         return hasNextActPredictions;
     }
 

@@ -103,15 +103,12 @@ public class FightPredictor implements
         List<AbstractCard> masterDeck = AbstractDungeon.player.masterDeck.group;
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
         String encounter = AbstractDungeon.lastCombatMetricKey;
-        String character = AbstractDungeon.player.chosenClass.name();
         int maxHP = AbstractDungeon.player.maxHealth;
         int enteringHP = AbstractDungeon.player.currentHealth;
-//        int ascension = AbstractDungeon.ascensionLevel; // This is what should be used but there is no data outside of asc 20
-        int ascension = 20;
-        int floor = AbstractDungeon.floorNum;
+        int ascension = AbstractDungeon.ascensionLevel;
         boolean potionUsed = false;
 
-        float[] inputVector = ModelUtils.getInputVector(masterDeck, masterRelics, encounter, character, maxHP, enteringHP, ascension, floor, potionUsed);
+        float[] inputVector = ModelUtils.getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
         float prediction = model.predict(inputVector);
         float intPrediction = Math.round(prediction * 100);
         logger.info("Expected health loss: " + intPrediction);
