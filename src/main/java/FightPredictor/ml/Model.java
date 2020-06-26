@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class Model {
 
-    public static final int NUM_FEATURES = 975;
+    public static final int NUM_FEATURES = 970;
 
     SavedModelBundle model;
     String inputOp;
