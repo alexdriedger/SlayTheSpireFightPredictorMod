@@ -29,8 +29,7 @@ public class RenderValuePatches {
     public static String curActPredictionText = "This act: ";
     public static String nextActPredictionText = "Next act: ";
 
-    private static float heightBuffer = 15f;
-    private static float widthBuffer = 15f;
+    private static float heightBuffer = 15f * Settings.scale;
 
     @SpirePatch(clz = CardRewardScreen.class, method = "renderCardReward")
     public static class RenderPrediction {
@@ -39,16 +38,16 @@ public class RenderValuePatches {
             for(AbstractCard c : __instance.rewardGroup) {
                 //TODO: Add check to see if prediction for card exists
                 if (true) {
-                    double curAct = 1.2525;
-                    double nextAct = -2.33734;
+                    float curAct = 1.2525f;
+                    float nextAct = -2.33734f;
 
-                    FontHelper.renderFontLeftTopAligned(sb,
-                            FontHelper.cardEnergyFont_L,
-                            curActPredictionText + twoDecFormat.format(curAct)
-                                + " \n"
-                                + nextActPredictionText + twoDecFormat.format(nextAct),
-                            c.current_x - AbstractCard.RAW_W * Settings.scale,
-                            c.current_y - AbstractCard.RAW_H * Settings.scale - heightBuffer,
+                    FontHelper.renderSmartText(sb,
+                            FontHelper.topPanelAmountFont,
+                            curActPredictionText + " TAB " + formatNum(curAct)
+                                    + " NL "
+                                    + nextActPredictionText + " TAB " + formatNum(nextAct),
+                            c.hb.x,
+                            c.hb.y - heightBuffer,
                             Color.WHITE);
                 }
             }
@@ -59,6 +58,10 @@ public class RenderValuePatches {
                 Matcher finalMatcher = new Matcher.MethodCallMatcher(AbstractCard.class, "render");
                 return LineFinder.findInOrder(ctMethodToPatch, new ArrayList<>(), finalMatcher);
             }
+        }
+
+        private static String formatNum(double num) {
+            return (num>0?"#g+":"#r") + twoDecFormat.format(num);
         }
     }
 }
