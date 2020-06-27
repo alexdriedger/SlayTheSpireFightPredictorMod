@@ -52,7 +52,10 @@ public class CombatPredictionPatches {
         String text = getPredictionString(combatHPLossPrediction, combatStartingHP - AbstractDungeon.player.currentHealth);
 
         sb.setColor(Settings.HALF_TRANSPARENT_BLACK_COLOR);
-        sb.draw(ImageMaster.WHITE_SQUARE_IMG, START_X, START_Y, FontHelper.getSmartWidth(FontHelper.largeDialogOptionFont, text, Float.MAX_VALUE, FontHelper.largeDialogOptionFont.getSpaceWidth()), BOX_H);
+        sb.draw(ImageMaster.WHITE_SQUARE_IMG,
+                START_X, START_Y,
+                FontHelper.getSmartWidth(FontHelper.largeDialogOptionFont, text, Float.MAX_VALUE, FontHelper.largeDialogOptionFont.getSpaceWidth()) + scl(ImageMaster.INTENT_ATK_6.getWidth()) + scl(32f),
+                BOX_H);
         sb.setColor(Color.WHITE);
         sb.draw(ImageMaster.INTENT_ATK_6, -START_X, START_Y - BOX_H*0.5f + 10f, scl(ImageMaster.INTENT_ATK_6.getWidth()), scl(ImageMaster.INTENT_ATK_6.getHeight()));
 
