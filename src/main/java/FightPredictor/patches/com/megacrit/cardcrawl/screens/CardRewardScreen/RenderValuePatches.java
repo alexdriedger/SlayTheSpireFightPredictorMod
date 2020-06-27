@@ -55,7 +55,7 @@ public class RenderValuePatches {
 
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,
-                            curActPredictionText + ": TAB " + formatNum(curAct)
+                            curActPredictionText + ":  TAB " + formatNum(curAct)
                                     + " NL "
                                     + nextActPredictionText + ": TAB " + formatNum(nextAct),
                             c.hb.x,

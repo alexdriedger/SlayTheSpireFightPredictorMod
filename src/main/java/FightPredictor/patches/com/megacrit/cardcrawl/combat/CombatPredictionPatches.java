@@ -79,9 +79,9 @@ public class CombatPredictionPatches {
         String damage = uiStrings.TEXT[2];
         String healed = uiStrings.TEXT[3];
         if (prediction >= 0) {
-            return "#r" + prediction + damage;
+            return "#r" + prediction + " " + damage;
         } else {
-            return "#g" + (-prediction) + healed;
+            return "#g" + (-prediction) + " " + healed;
         }
     }
 
@@ -96,9 +96,9 @@ public class CombatPredictionPatches {
         }
 
         if (real >= 0) {
-            return color + real + damage;
+            return color + real + " " + damage;
         } else {
-            return color + (-real) + healed;
+            return color + (-real) + " " + healed;
         }
     }
 }

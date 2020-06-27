@@ -4,6 +4,7 @@ import FightPredictor.CardEvaluation;
 import FightPredictor.FightPredictor;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.rewards.RewardItem;
 import com.megacrit.cardcrawl.screens.CombatRewardScreen;
 
@@ -28,7 +29,7 @@ public class CombatRewardScreenPatches {
             // Evaluate cards
             for (AbstractCard c : cards) {
                 CardEvaluation ce = new CardEvaluation(c);
-                ce.calculateAgainst(skip);
+                ce.calculateAgainst(skip, AbstractDungeon.floorNum, AbstractDungeon.actNum);
                 FightPredictor.cardEvaluations.put(c, ce);
 
                 FightPredictor.logger.info(ce.getCardID() + ". This Act => " + ce.getCurrentActScore());

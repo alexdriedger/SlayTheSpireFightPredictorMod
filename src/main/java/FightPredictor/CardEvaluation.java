@@ -3,17 +3,24 @@ package FightPredictor;
 import FightPredictor.ml.ModelUtils;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.MonsterHelper;
 import org.apache.logging.log4j.util.Strings;
 
 import java.util.*;
 
 public class CardEvaluation {
 
+    private static final Map<Integer, List<String>> hallwayIDs;
     private static final Map<Integer, List<String>> eliteIDs;
     private static final Map<Integer, List<String>> bossIDs;
     public static final String SKIP = "SKIP";
 
     static {
+        hallwayIDs = new HashMap<>();
+        hallwayIDs.put(1, Arrays.asList("Gremlin Gang", "Large Slime", "Looter", "Lots of Slimes", "Exordium Thugs", "Exordium Wildlife", "Red Slaver", "3 Louse", "2 Fungi Beasts"));
+        hallwayIDs.put(2, Arrays.asList("Chosen and Byrds", "Sentry and Sphere", "Snake Plant", "Snecko", "Centurion and Healer", "Cultist and Chosen", "3 Cultists", "Shelled Parasite and Fungi"));
+        hallwayIDs.put(3, Arrays.asList("Transient", "4 Shapes", "Maw", "Jaw Worm Horde", "Sphere and 2 Shapes", "Spire Growth", "Writhing Mass"));
+
         eliteIDs = new HashMap<>();
         eliteIDs.put(1, Arrays.asList("Gremlin Nob", "Lagavulin", "3 Sentries"));
         eliteIDs.put(2, Arrays.asList("Gremlin Leader", "Slavers", "Book of Stabbing"));
@@ -30,8 +37,10 @@ public class CardEvaluation {
     private final String cardID;
     private final boolean hasNextActPredictions;
 
+    private Map<String, Float> currentActHallwayPredictions;
     private Map<String, Float> currentActElitesPredictions;
     private Map<String, Float> currentActBossesPredictions;
+    private Map<String, Float> nextActHallwayPredictions;
     private Map<String, Float> nextActElitesPredictions;
     private Map<String, Float> nextActBossesPredictions;
 
@@ -49,9 +58,15 @@ public class CardEvaluation {
         float[] vec = Arrays.copyOf(baseVector, baseVector.length);
 
 
+        if (actNum < 4) {
+            currentActHallwayPredictions = makePredictions(hallwayIDs.get(actNum), vec);
+        }
         currentActElitesPredictions = makePredictions(eliteIDs.get(actNum), vec);
         currentActBossesPredictions = makePredictions(bossIDs.get(actNum), vec);
         if (this.hasNextActPredictions) {
+            if (actNum < 3) {
+                nextActHallwayPredictions = makePredictions(hallwayIDs.get(actNum + 1), vec);
+            }
             nextActElitesPredictions = makePredictions(eliteIDs.get(actNum + 1), vec);
             nextActBossesPredictions = makePredictions(bossIDs.get(actNum + 1), vec);
         }
@@ -72,6 +87,14 @@ public class CardEvaluation {
         this(c.cardID, ModelUtils.getInputVector(c), AbstractDungeon.actNum);
     }
 
+    /**
+     * Get an evaluation of the current game state with the addition of a single card
+     * @param c Card to add
+     */
+    public CardEvaluation(AbstractCard c, int actNum) {
+        this(c.cardID, ModelUtils.getInputVector(c), actNum);
+    }
+
     private static Map<String, Float> makePredictions(List<String> encounters, float[] vector) {
         Map<String, Float> predictions = new HashMap<>();
         for (String enc : encounters) {
@@ -83,23 +106,76 @@ public class CardEvaluation {
     }
 
     /**
-     * Calculate a score against another game state.
-     * Score = Avg damage taken in other elite & boss fights - Avg damage taken in this elite & boss fights
+     * Calculate a score against another game state at a given floor. Use calculateAgainst(CardEvaluation other) for simple
+     * average score calculation
+     *
      * @param other game state to compare against
+     * @param floorNum player is currently on
+     * @param actNum player is in
      */
-    public void calculateAgainst(CardEvaluation other) {
-        this.currentActScore = (other.getCurrentActAvg() - this.getCurrentActAvg()) * 100f;
+    public void calculateAgainst(CardEvaluation other, int floorNum, int actNum) {
+        if (actNum == 4) {
+            this.currentActScore = (other.getCurrentActEliteAndBossAvg() - this.getCurrentActEliteAndBossAvg()) * 100f;
+            return;
+        }
+
+        this.currentActScore = (other.calculateCurrentActScore(floorNum, actNum) - this.calculateCurrentActScore(floorNum, actNum)) * 100f;
         if (this.hasNextActPredictions) {
-            this.nextActScore = (other.getNextActAvg() - this.getNextActAvg()) * 100f;
+            this.nextActScore = (other.calculateNextActScore(floorNum, actNum) - this.calculateNextActScore(floorNum, actNum)) * 100f;
         }
     }
 
-    public float getCurrentActAvg() {
-        return getAvg(currentActElitesPredictions.values(), currentActBossesPredictions.values());
+    private float calculateCurrentActScore(int floorNum, int actNum) {
+        float currentActHallwayScore = getAvg(currentActHallwayPredictions.values());
+        float currentActEliteScore = getAvg(currentActElitesPredictions.values());
+        float currentActBossScore = currentActBossesPredictions.get(AbstractDungeon.bossKey);
+
+        int bossCount = 1;
+        int eliteCount = isSecondHalfOfAct(floorNum) ? 2 : 3;
+        int hallwayCount = isSecondHalfOfAct(floorNum) ? 2 : 5;
+
+        float total = (currentActHallwayScore * hallwayCount) + (currentActEliteScore * eliteCount) + (currentActBossScore * bossCount);
+        return (total / (hallwayCount + eliteCount + bossCount));
     }
 
-    public float getNextActAvg() {
-        return getAvg(nextActElitesPredictions.values(), nextActBossesPredictions.values());
+    private float calculateNextActScore(int floorNum, int actNum) {
+        if (hasNextActPredictions) {
+            float nextActHallwayScore = actNum < 3 ? getAvg(nextActHallwayPredictions.values()) : 0f;
+            float nextActEliteScore = getAvg(nextActElitesPredictions.values());
+            float nextActBossScore = getAvg(nextActBossesPredictions.values());
+
+            int bossCount = 3;
+            int eliteCount = 3;
+            int hallwayCount = 5;
+
+            float total = (nextActHallwayScore * hallwayCount) + (nextActEliteScore * eliteCount) + (nextActBossScore * bossCount);
+            return (total / (hallwayCount + eliteCount + bossCount));
+        }
+        return 0f;
+    }
+
+    private boolean isSecondHalfOfAct(int floorNum) {
+        if (floorNum < 9) {
+            return false;
+        } else if (floorNum < 17) {
+            return true;
+        } else if (floorNum < 26) {
+            return false;
+        } else if (floorNum < 34) {
+            return true;
+        } else if (floorNum < 43) {
+            return false;
+        } else if (floorNum < 51) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
+    private float getCurrentActEliteAndBossAvg() {
+        return getAvg(currentActElitesPredictions.values(), currentActBossesPredictions.values());
     }
 
     private float getAvg(Collection<Float>... floatCollections) {
