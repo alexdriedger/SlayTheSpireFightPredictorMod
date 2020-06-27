@@ -40,6 +40,7 @@ public class FightPredictor implements
     private static String modID;
 
     public static final String COMBAT_PREDICTION_PANEL_ID = "FightPredictor:Combat Prediction Panel";
+    public static final String CARD_REWARD_VALUE_PREDICTION_ID = "FightPredictor:Card Reward Value Prediction";
 
     public static Model model;
 

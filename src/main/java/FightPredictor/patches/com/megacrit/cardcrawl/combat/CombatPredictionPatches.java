@@ -24,7 +24,7 @@ public class CombatPredictionPatches {
     public static int combatHPLossPrediction = 0;
     public static int combatStartingHP = 0;
 
-    private static UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.COMBAT_PREDICTION_PANEL_ID);
+    private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.COMBAT_PREDICTION_PANEL_ID);
 
     @SpirePatch(clz = AbstractRoom.class, method = "render")
     public static class RenderCall {

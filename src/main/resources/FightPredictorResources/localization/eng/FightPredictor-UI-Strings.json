@@ -6,5 +6,11 @@
       "damage",
       "healed"
     ]
+  },
+  "FightPredictor:Card Reward Value Prediction": {
+    "TEXT": [
+      "This act",
+      "Next act"
+    ]
   }
 }
