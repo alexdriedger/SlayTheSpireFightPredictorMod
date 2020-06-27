@@ -47,6 +47,7 @@ public class FightPredictor implements
 
     public static Map<AbstractCard, CardEvaluation> cardEvaluations;
     public static Map<AbstractCard, CardEvaluation> upgradeEvaluations;
+    public static Map<AbstractCard, CardEvaluation> purgeEvaluations;
     
     public FightPredictor() {
         logger.info("Subscribe to BaseMod hooks");
@@ -56,6 +57,7 @@ public class FightPredictor implements
 
         cardEvaluations = new HashMap<>();
         upgradeEvaluations = new HashMap<>();
+        purgeEvaluations = new HashMap<>();
 
         logger.info("Done subscribing");
     }
