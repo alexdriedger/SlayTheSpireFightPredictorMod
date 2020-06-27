@@ -20,10 +20,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class RenderValuePatches {
-    private static DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.US);
-    private static DecimalFormat twoDecFormat = new DecimalFormat("##0.00", otherSymbols);
+import static FightPredictor.util.HelperMethods.formatNum;
 
+public class RenderValuePatches {
     private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.CARD_REWARD_VALUE_PREDICTION_ID);
     private static final String curActPredictionText = uiStrings.TEXT[0];
     private static final String nextActPredictionText = uiStrings.TEXT[1];
@@ -71,12 +70,6 @@ public class RenderValuePatches {
             }
         }
 
-        private static String formatNum(double num) {
-            if(num != 9999f) {
-                return (num>0?"#g+":"#r") + twoDecFormat.format(num);
-            } else {
-                return "#y----";
-            }
-        }
+
     }
 }
