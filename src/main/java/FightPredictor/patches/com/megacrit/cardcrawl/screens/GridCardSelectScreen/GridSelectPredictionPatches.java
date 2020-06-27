@@ -75,9 +75,17 @@ public class GridSelectPredictionPatches {
 
         private static String getPredictionString(AbstractCard c, boolean forUpgrade) {
             if(forUpgrade) {
-                return HelperMethods.formatNum(FightPredictor.upgradeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(FightPredictor.upgradeEvaluations.get(c).getNextActScore());
+                float nextAct = 9999f;
+                if(FightPredictor.upgradeEvaluations.get(c).hasNextActPredictions()) {
+                    nextAct = FightPredictor.upgradeEvaluations.get(c).getNextActScore();
+                }
+                return HelperMethods.formatNum(FightPredictor.upgradeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(nextAct);
             } else {
-                return HelperMethods.formatNum(FightPredictor.purgeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(FightPredictor.purgeEvaluations.get(c).getNextActScore());
+                float nextAct = 9999f;
+                if(FightPredictor.purgeEvaluations.get(c).hasNextActPredictions()) {
+                    nextAct = FightPredictor.purgeEvaluations.get(c).getNextActScore();
+                }
+                return HelperMethods.formatNum(FightPredictor.purgeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(nextAct);
             }
         }
     }
