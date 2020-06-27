@@ -1,0 +1,16 @@
+{
+  "FightPredictor:Combat Prediction Panel": {
+    "TEXT": [
+      "预计受到",
+      "实际受到",
+      "点伤害",
+      "点治疗"
+    ]
+  },
+  "FightPredictor:Card Reward Value Prediction": {
+    "TEXT": [
+      "这一幕的价值",
+      "下一幕的价值"
+    ]
+  }
+}

@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
@@ -98,7 +99,13 @@ public class FightPredictor implements
     @Override
     public void receiveEditStrings() {
         String path = getResourceDir() + "localization/";
-        String language = "eng";
+        String language;
+        if (Settings.language.toString().equals("ZHS")) {
+            language = "zhs";
+        } else {
+            // Load English by default
+            language = "eng";
+        }
         path += language;
 
         BaseMod.loadCustomStringsFile(UIStrings.class,
