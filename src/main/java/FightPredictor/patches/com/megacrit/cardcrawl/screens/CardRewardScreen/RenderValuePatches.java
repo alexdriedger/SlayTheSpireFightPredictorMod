@@ -24,8 +24,9 @@ public class RenderValuePatches {
     private static DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.US);
     private static DecimalFormat twoDecFormat = new DecimalFormat("##0.00", otherSymbols);
 
-    //TODO: Add localization support
     private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.CARD_REWARD_VALUE_PREDICTION_ID);
+    private static final String curActPredictionText = uiStrings.TEXT[0];
+    private static final String nextActPredictionText = uiStrings.TEXT[1];
 
     @SpirePatch(clz = CardRewardScreen.class, method = "renderTwitchVotes")
     public static class RemoveTwitchVotes {
@@ -41,8 +42,6 @@ public class RenderValuePatches {
     public static class RenderPrediction {
         @SpireInsertPatch(locator = Locator.class)
         public static void patch(CardRewardScreen __instance, SpriteBatch sb) {
-            String curActPredictionText = uiStrings.TEXT[0];
-            String nextActPredictionText = uiStrings.TEXT[1];
             for(AbstractCard c : __instance.rewardGroup) {
                 CardEvaluation ce = FightPredictor.cardEvaluations.get(c);
 
@@ -55,7 +54,7 @@ public class RenderValuePatches {
 
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,
-                            curActPredictionText + ":  TAB " + formatNum(curAct)
+                            curActPredictionText + ": TAB " + formatNum(curAct)
                                     + " NL "
                                     + nextActPredictionText + ": TAB " + formatNum(nextAct),
                             c.hb.x,

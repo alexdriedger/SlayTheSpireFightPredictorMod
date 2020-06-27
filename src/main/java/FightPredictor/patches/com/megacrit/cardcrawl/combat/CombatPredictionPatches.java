@@ -25,6 +25,10 @@ public class CombatPredictionPatches {
     public static int combatStartingHP = 0;
 
     private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.COMBAT_PREDICTION_PANEL_ID);
+    private static final String predictionText = uiStrings.TEXT[0];
+    private static final String realText = uiStrings.TEXT[1];
+    private static final String damage = uiStrings.TEXT[2];
+    private static final String healed = uiStrings.TEXT[3];
 
     @SpirePatch(clz = AbstractRoom.class, method = "render")
     public static class RenderCall {
@@ -45,15 +49,12 @@ public class CombatPredictionPatches {
     private static float START_Y = Settings.HEIGHT - (scl(176.0F) + scl(AbstractBlight.RAW_W));
     private static final float BOX_H = scl(75);
     public static void renderPredictionDisplay(SpriteBatch sb) {
-        String predictionText = uiStrings.TEXT[0];
-        String realText = uiStrings.TEXT[1];
-        String damage = uiStrings.TEXT[2];
+        String text = getPredictionString(combatHPLossPrediction, combatStartingHP - AbstractDungeon.player.currentHealth);
 
         sb.setColor(Settings.HALF_TRANSPARENT_BLACK_COLOR);
-        sb.draw(ImageMaster.WHITE_SQUARE_IMG, START_X, START_Y, scl(450), BOX_H);
+        sb.draw(ImageMaster.WHITE_SQUARE_IMG, START_X, START_Y, FontHelper.getSmartWidth(FontHelper.largeDialogOptionFont, text, Float.MAX_VALUE, FontHelper.largeDialogOptionFont.getSpaceWidth()), BOX_H);
         sb.setColor(Color.WHITE);
         sb.draw(ImageMaster.INTENT_ATK_6, -START_X, START_Y - BOX_H*0.5f + 10f, scl(ImageMaster.INTENT_ATK_6.getWidth()), scl(ImageMaster.INTENT_ATK_6.getHeight()));
-        String text = getPredictionString(predictionText, realText, combatHPLossPrediction, combatStartingHP - AbstractDungeon.player.currentHealth, damage);
 
         FontHelper.renderSmartText(sb,
                 FontHelper.largeDialogOptionFont,
@@ -63,7 +64,7 @@ public class CombatPredictionPatches {
                 Color.WHITE);
     }
 
-    private static String getPredictionString(String predictionText, String realText, int predictionVal, int realVal, String suffix) {
+    private static String getPredictionString(int predictionVal, int realVal) {
         String combatNum = getCombatNum(predictionVal);
         String realNum = getRealNum(predictionVal, realVal);
         return predictionText + ": TAB " + combatNum
@@ -76,8 +77,6 @@ public class CombatPredictionPatches {
     }
 
     private static String getCombatNum(int prediction) {
-        String damage = uiStrings.TEXT[2];
-        String healed = uiStrings.TEXT[3];
         if (prediction >= 0) {
             return "#r" + prediction + " " + damage;
         } else {
@@ -86,8 +85,6 @@ public class CombatPredictionPatches {
     }
 
     private static String getRealNum(int prediction, int real) {
-        String damage = uiStrings.TEXT[2];
-        String healed = uiStrings.TEXT[3];
         String color;
         if (real <= prediction) {
             color = "#g";
