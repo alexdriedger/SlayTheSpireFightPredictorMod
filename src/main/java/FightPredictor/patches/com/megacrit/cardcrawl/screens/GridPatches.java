@@ -44,6 +44,23 @@ public class GridPatches {
                     FightPredictor.logger.info(ce.getCardID() + " upgrade. Next Act => " + ce.getNextActScore());
                 }
             }
+        } else if (forPurge) {
+            List<AbstractCard> purgeableCards = AbstractDungeon.player.masterDeck.getPurgeableCards().group;
+            FightPredictor.purgeEvaluations.clear();
+
+            CardEvaluation skip = new CardEvaluation();
+
+            for (AbstractCard c : purgeableCards) {
+                float[] vector = ModelUtils.getInputVectorWithRemoval(c);
+                CardEvaluation ce = new CardEvaluation(c.cardID, vector, AbstractDungeon.actNum);
+                ce.calculateAgainst(skip, AbstractDungeon.floorNum, AbstractDungeon.actNum);
+                FightPredictor.purgeEvaluations.put(c, ce);
+
+                FightPredictor.logger.info(ce.getCardID() + " removal. This Act => " + ce.getCurrentActScore());
+                if (ce.hasNextActPredictions()) {
+                    FightPredictor.logger.info(ce.getCardID() + " removal. Next Act => " + ce.getNextActScore());
+                }
+            }
         }
     }
 }
