@@ -46,6 +46,7 @@ public class FightPredictor implements
     public static Model model;
 
     public static Map<AbstractCard, CardEvaluation> cardEvaluations;
+    public static Map<AbstractCard, CardEvaluation> upgradeEvaluations;
     
     public FightPredictor() {
         logger.info("Subscribe to BaseMod hooks");
@@ -54,6 +55,7 @@ public class FightPredictor implements
         setModID("FightPredictor");
 
         cardEvaluations = new HashMap<>();
+        upgradeEvaluations = new HashMap<>();
 
         logger.info("Done subscribing");
     }

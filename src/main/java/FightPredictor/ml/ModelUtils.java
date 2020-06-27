@@ -96,6 +96,53 @@ public class ModelUtils {
     }
 
     /**
+     * Returns the base input vector with the given card removed from the deck. The encounter is set to
+     * the last combat encounter. Use changeEncounter to change the encounter.
+     *
+     * @param c Card to add to the vector
+     * @return input vector
+     */
+    public static float[] getInputVectorWithRemoval(AbstractCard c) {
+        List<AbstractCard> masterDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
+        masterDeck.remove(c);
+        List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
+        String encounter = AbstractDungeon.lastCombatMetricKey;
+        int maxHP = AbstractDungeon.player.maxHealth;
+        int enteringHP = AbstractDungeon.player.currentHealth;
+        int ascension = AbstractDungeon.ascensionLevel;
+        boolean potionUsed = false;
+
+        return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
+    }
+
+    /**
+     * Returns the base input vector with the given card upgraded. The encounter is set to
+     * the last combat encounter. Use changeEncounter to change the encounter.
+     *
+     * @param c Card to add to the vector
+     * @return input vector
+     */
+    public static float[] getInputVectorWithUpgrade(AbstractCard c) {
+        List<AbstractCard> masterDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
+        masterDeck.remove(c);
+        AbstractCard upgraded = c.makeCopy();
+        upgraded.upgrade();
+        masterDeck.add(upgraded);
+        List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
+        String encounter = AbstractDungeon.lastCombatMetricKey;
+        int maxHP = AbstractDungeon.player.maxHealth;
+        int enteringHP = AbstractDungeon.player.currentHealth;
+        int ascension = AbstractDungeon.ascensionLevel;
+        boolean potionUsed = false;
+
+        return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
+//        float[] baseVec = getBaseInputVector();
+//        FightPredictor.logger.info("upgrad vec first");
+//        FightPredictor.logger.info(upVec);
+//        FightPredictor.logger.info(baseVec);
+    }
+
+    /**
      * Returns an input vector that can be used by the Model
      *
      * @param masterDeck
@@ -112,7 +159,12 @@ public class ModelUtils {
         float[] outputVector = new float[Model.NUM_FEATURES];
 
         List<String> cardIds = masterDeck.stream()
-                                .map(c -> c.cardID)
+                                .map(c -> {
+                                    if (c.upgraded) {
+                                        return c.cardID + "+1";
+                                    }
+                                    return c.cardID;
+                                })
                                 .map(ModelUtils::generalizeStrikeDefend)
                                 .collect(Collectors.toList());
         List<String> relicIds = masterRelics.stream()
@@ -143,7 +195,8 @@ public class ModelUtils {
     public static float[] changeEncounter(float[] vector, String encounter) {
         float[] vecCopy = Arrays.copyOf(vector, vector.length);
         Arrays.fill(vecCopy, cardCount + relicCount, cardCount + relicCount + encountersCount, 0.0f);
-        vecCopy[encounterEncoding.get(encounter) + cardCount + relicCount] += 1;
+        int index = encounterEncoding.get(encounter) + cardCount + relicCount;
+        vecCopy[index] += 1 / inputScales.get(index);
         return vecCopy;
     }
 }
