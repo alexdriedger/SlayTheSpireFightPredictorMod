@@ -16,6 +16,7 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class GridSelectPredictionPatches {
     @SpirePatch(clz = GridCardSelectScreen.class, method = "render")
@@ -75,11 +76,19 @@ public class GridSelectPredictionPatches {
 
         private static String getPredictionString(AbstractCard c, boolean forUpgrade) {
             if(forUpgrade) {
+                Random r = new Random();
+                float currentAct = FightPredictor.upgradeEvaluations.get(c).getCurrentActScore();
+                if (currentAct < 0f) {
+                    currentAct = 0.03f;
+                }
                 float nextAct = 9999f;
                 if(FightPredictor.upgradeEvaluations.get(c).hasNextActPredictions()) {
                     nextAct = FightPredictor.upgradeEvaluations.get(c).getNextActScore();
+                    if (nextAct < 0f) {
+                        nextAct = 0.04f;
+                    }
                 }
-                return HelperMethods.formatNum(FightPredictor.upgradeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(nextAct);
+                return HelperMethods.formatNum(currentAct) + " | " + HelperMethods.formatNum(nextAct);
             } else {
                 float nextAct = 9999f;
                 if(FightPredictor.purgeEvaluations.get(c).hasNextActPredictions()) {

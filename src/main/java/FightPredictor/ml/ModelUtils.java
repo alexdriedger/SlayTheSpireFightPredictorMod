@@ -66,7 +66,12 @@ public class ModelUtils {
     public static float[] getBaseInputVector() {
         List<AbstractCard> masterDeck = AbstractDungeon.player.masterDeck.group;
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
-        String encounter = AbstractDungeon.lastCombatMetricKey;
+        String encounter;
+        if (AbstractDungeon.lastCombatMetricKey != null) {
+            encounter = AbstractDungeon.lastCombatMetricKey;
+        } else {
+            encounter = "2 Louse"; // For occasional crash from save and load
+        }
         int maxHP = AbstractDungeon.player.maxHealth;
         int enteringHP = AbstractDungeon.player.currentHealth;
         int ascension = AbstractDungeon.ascensionLevel;
@@ -86,7 +91,12 @@ public class ModelUtils {
         List<AbstractCard> masterDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
         masterDeck.add(c);
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
-        String encounter = AbstractDungeon.lastCombatMetricKey;
+        String encounter;
+        if (AbstractDungeon.lastCombatMetricKey != null) {
+            encounter = AbstractDungeon.lastCombatMetricKey;
+        } else {
+            encounter = "2 Louse"; // For occasional crash from save and load
+        }
         int maxHP = AbstractDungeon.player.maxHealth;
         int enteringHP = AbstractDungeon.player.currentHealth;
         int ascension = AbstractDungeon.ascensionLevel;
@@ -106,7 +116,12 @@ public class ModelUtils {
         List<AbstractCard> masterDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
         masterDeck.remove(c);
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
-        String encounter = AbstractDungeon.lastCombatMetricKey;
+        String encounter;
+        if (AbstractDungeon.lastCombatMetricKey != null) {
+            encounter = AbstractDungeon.lastCombatMetricKey;
+        } else {
+            encounter = "2 Louse"; // For occasional crash from save and load
+        }
         int maxHP = AbstractDungeon.player.maxHealth;
         int enteringHP = AbstractDungeon.player.currentHealth;
         int ascension = AbstractDungeon.ascensionLevel;
@@ -129,17 +144,18 @@ public class ModelUtils {
         upgraded.upgrade();
         masterDeck.add(upgraded);
         List<AbstractRelic> masterRelics = AbstractDungeon.player.relics;
-        String encounter = AbstractDungeon.lastCombatMetricKey;
+        String encounter;
+        if (AbstractDungeon.lastCombatMetricKey != null) {
+            encounter = AbstractDungeon.lastCombatMetricKey;
+        } else {
+            encounter = "2 Louse"; // For occasional crash from save and load
+        }
         int maxHP = AbstractDungeon.player.maxHealth;
         int enteringHP = AbstractDungeon.player.currentHealth;
         int ascension = AbstractDungeon.ascensionLevel;
         boolean potionUsed = false;
 
         return getInputVector(masterDeck, masterRelics, encounter, maxHP, enteringHP, ascension, potionUsed);
-//        float[] baseVec = getBaseInputVector();
-//        FightPredictor.logger.info("upgrad vec first");
-//        FightPredictor.logger.info(upVec);
-//        FightPredictor.logger.info(baseVec);
     }
 
     /**

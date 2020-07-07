@@ -4,7 +4,7 @@
   <groupId>fightpredictor</groupId>
   <artifactId>FightPredictor</artifactId>
   <name>Fight Predictor</name>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <description>Uses machine learning to predict the outcome of fights</description>
   <build>
     <resources>
@@ -102,7 +102,7 @@
     <ModTheSpire.version>3.8.0</ModTheSpire.version>
     <Steam.path>C:/Program Files (x86)/Steam/steamapps</Steam.path>
     <maven.compiler.source>1.8</maven.compiler.source>
-    <SlayTheSpire.version>01-23-2019</SlayTheSpire.version>
+    <SlayTheSpire.version>01-27-2020</SlayTheSpire.version>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 </project>
