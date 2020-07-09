@@ -3,8 +3,6 @@ package FightPredictor;
 import FightPredictor.ml.ModelUtils;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
-import com.megacrit.cardcrawl.helpers.MonsterHelper;
-import org.apache.logging.log4j.util.Strings;
 
 import java.util.*;
 
@@ -119,60 +117,32 @@ public class CardEvaluation {
             return;
         }
 
-        this.currentActScore = (other.calculateCurrentActScore(floorNum, actNum) - this.calculateCurrentActScore(floorNum, actNum)) * 100f;
+        this.currentActScore = (other.calculateCurrentActScore() - this.calculateCurrentActScore()) * 100f;
         if (this.hasNextActPredictions) {
-            this.nextActScore = (other.calculateNextActScore(floorNum, actNum) - this.calculateNextActScore(floorNum, actNum)) * 100f;
+            this.nextActScore = (other.calculateNextActScore(actNum) - this.calculateNextActScore(actNum)) * 100f;
         }
     }
 
-    private float calculateCurrentActScore(int floorNum, int actNum) {
+    private float calculateCurrentActScore() {
         float currentActHallwayScore = getAvg(currentActHallwayPredictions.values());
         float currentActEliteScore = getAvg(currentActElitesPredictions.values());
         float currentActBossScore = currentActBossesPredictions.get(AbstractDungeon.bossKey);
 
-        int bossCount = 1;
-        int eliteCount = isSecondHalfOfAct(floorNum) ? 2 : 3;
-        int hallwayCount = isSecondHalfOfAct(floorNum) ? 2 : 5;
-
-        float total = (currentActHallwayScore * hallwayCount) + (currentActEliteScore * eliteCount) + (currentActBossScore * bossCount);
-        return (total / (hallwayCount + eliteCount + bossCount));
+        float total = (currentActHallwayScore * currentActHallwayScore) + (currentActEliteScore * currentActEliteScore) + (currentActBossScore * currentActBossScore);
+        return (total / (currentActHallwayScore + currentActEliteScore + currentActBossScore));
     }
 
-    private float calculateNextActScore(int floorNum, int actNum) {
+    private float calculateNextActScore(int actNum) {
         if (hasNextActPredictions) {
             float nextActHallwayScore = actNum < 3 ? getAvg(nextActHallwayPredictions.values()) : 0f;
             float nextActEliteScore = getAvg(nextActElitesPredictions.values());
             float nextActBossScore = getAvg(nextActBossesPredictions.values());
 
-            int bossCount = 3;
-            int eliteCount = 3;
-            int hallwayCount = 5;
-
-            float total = (nextActHallwayScore * hallwayCount) + (nextActEliteScore * eliteCount) + (nextActBossScore * bossCount);
-            return (total / (hallwayCount + eliteCount + bossCount));
+            float total = (nextActHallwayScore * nextActHallwayScore) + (nextActEliteScore * nextActEliteScore) + (nextActBossScore * nextActBossScore);
+            return (total / (nextActHallwayScore + nextActEliteScore + nextActBossScore));
         }
         return 0f;
     }
-
-    private boolean isSecondHalfOfAct(int floorNum) {
-        if (floorNum < 9) {
-            return false;
-        } else if (floorNum < 17) {
-            return true;
-        } else if (floorNum < 26) {
-            return false;
-        } else if (floorNum < 34) {
-            return true;
-        } else if (floorNum < 43) {
-            return false;
-        } else if (floorNum < 51) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-
 
     private float getCurrentActEliteAndBossAvg() {
         return getAvg(currentActElitesPredictions.values(), currentActBossesPredictions.values());
