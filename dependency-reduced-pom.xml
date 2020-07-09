@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fightpredictor</groupId>
   <artifactId>FightPredictor</artifactId>
-  <name>Fight Predictor</name>
+  <name>Slay-I</name>
   <version>1.0.0</version>
   <description>Uses machine learning to predict the outcome of fights</description>
   <build>
