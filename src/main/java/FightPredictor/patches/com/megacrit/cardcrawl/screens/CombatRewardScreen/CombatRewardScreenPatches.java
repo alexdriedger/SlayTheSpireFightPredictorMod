@@ -1,7 +1,8 @@
 package FightPredictor.patches.com.megacrit.cardcrawl.screens.CombatRewardScreen;
 
-import FightPredictor.CardEvaluation;
 import FightPredictor.FightPredictor;
+import FightPredictor.CardEvaluationData;
+import FightPredictor.util.StatEvaluation;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
@@ -22,21 +23,7 @@ public class CombatRewardScreenPatches {
                     .flatMap(r -> r.cards.stream()) // Flatten out all card rewards for prayer wheel
                     .collect(Collectors.toList());
 
-            CardEvaluation skip = new CardEvaluation();
-
-            FightPredictor.cardEvaluations.clear();
-
-            // Evaluate cards
-            for (AbstractCard c : cards) {
-                CardEvaluation ce = new CardEvaluation(c);
-                ce.calculateAgainst(skip, AbstractDungeon.floorNum, AbstractDungeon.actNum);
-                FightPredictor.cardEvaluations.put(c, ce);
-
-                FightPredictor.logger.info(ce.getCardID() + ". This Act => " + ce.getCurrentActScore());
-                if (ce.hasNextActPredictions()) {
-                    FightPredictor.logger.info(ce.getCardID() + ". Next Act => " + ce.getNextActScore());
-                }
-            }
+            FightPredictor.cardChoicesEvaluations = CardEvaluationData.createByAdding(cards, AbstractDungeon.actNum, Math.max(AbstractDungeon.actNum + 1, 4));
 
         }
     }

@@ -159,6 +159,24 @@ public class ModelUtils {
     }
 
     /**
+     * Returns an input vector without an encounter encoded.
+     *
+     * @param masterDeck
+     * @param masterRelics
+     * @param maxHP
+     * @param enteringHP
+     * @param ascension
+     * @param potionUsed
+     * @return
+     */
+    public static float[] getInputVectorNoEncounter(List<AbstractCard> masterDeck, List<AbstractRelic> masterRelics,
+                                         int maxHP, int enteringHP, int ascension, boolean potionUsed) {
+        float[] vector = getInputVector(masterDeck, masterRelics, "2 Louse", maxHP, enteringHP, ascension, potionUsed);
+        Arrays.fill(vector, cardCount + relicCount, cardCount + relicCount + encountersCount, 0.0f);
+        return vector;
+    }
+
+    /**
      * Returns an input vector that can be used by the Model
      *
      * @param masterDeck

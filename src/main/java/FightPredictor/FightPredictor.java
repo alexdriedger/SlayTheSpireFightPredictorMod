@@ -45,7 +45,7 @@ public class FightPredictor implements
 
     public static Model model;
 
-    public static Map<AbstractCard, CardEvaluation> cardEvaluations;
+    public static CardEvaluationData cardChoicesEvaluations;
     public static Map<AbstractCard, CardEvaluation> upgradeEvaluations;
     public static Map<AbstractCard, CardEvaluation> purgeEvaluations;
     
@@ -55,7 +55,6 @@ public class FightPredictor implements
         BaseMod.subscribe(this);
         setModID("FightPredictor");
 
-        cardEvaluations = new HashMap<>();
         upgradeEvaluations = new HashMap<>();
         purgeEvaluations = new HashMap<>();
 
