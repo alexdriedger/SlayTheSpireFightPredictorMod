@@ -23,7 +23,7 @@ public class CombatRewardScreenPatches {
                     .flatMap(r -> r.cards.stream()) // Flatten out all card rewards for prayer wheel
                     .collect(Collectors.toList());
 
-            FightPredictor.cardChoicesEvaluations = CardEvaluationData.createByAdding(cards, AbstractDungeon.actNum, Math.max(AbstractDungeon.actNum + 1, 4));
+            FightPredictor.cardChoicesEvaluations = CardEvaluationData.createByAdding(cards, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4));
 
         }
     }

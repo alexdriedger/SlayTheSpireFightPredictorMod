@@ -4,7 +4,6 @@ import FightPredictor.util.BaseGameConstants;
 import FightPredictor.util.StatEvaluation;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
-import com.megacrit.cardcrawl.relics.AbstractRelic;
 
 import java.util.*;
 

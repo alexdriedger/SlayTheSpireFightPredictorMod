@@ -3,6 +3,7 @@ package FightPredictor.util;
 import FightPredictor.FightPredictor;
 import FightPredictor.ml.ModelUtils;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 
 import java.util.*;
@@ -79,12 +80,21 @@ public class StatEvaluation {
 
         float o1EliteExpectedDmg = enemiesToAverage(BaseGameConstants.eliteIDs, actNum, o1.predictions);
         float o2EliteExpectedDmg = enemiesToAverage(BaseGameConstants.eliteIDs, actNum, o2.predictions);
-        float o1BossExpectedDmg = enemiesToAverage(BaseGameConstants.bossIDs, actNum, o1.predictions);
-        float o2BossExpectedDmg = enemiesToAverage(BaseGameConstants.bossIDs, actNum, o2.predictions);
 
-        float hallwayDiff = o1HallwayExpectedDmg - o2HallwayExpectedDmg;
-        float eliteDiff = o1EliteExpectedDmg - o2EliteExpectedDmg;
-        float bossDiff = o1BossExpectedDmg - o2BossExpectedDmg;
+        float o1BossExpectedDmg;
+        float o2BossExpectedDmg;
+
+        if (actNum == AbstractDungeon.actNum) {
+            o1BossExpectedDmg = o1.predictions.get(AbstractDungeon.bossKey);
+            o2BossExpectedDmg = o2.predictions.get(AbstractDungeon.bossKey);
+        } else {
+            o1BossExpectedDmg = enemiesToAverage(BaseGameConstants.bossIDs, actNum, o1.predictions);
+            o2BossExpectedDmg = enemiesToAverage(BaseGameConstants.bossIDs, actNum, o2.predictions);
+        }
+
+        float hallwayDiff = o2HallwayExpectedDmg - o1HallwayExpectedDmg;
+        float eliteDiff = o2EliteExpectedDmg - o1EliteExpectedDmg;
+        float bossDiff = o2BossExpectedDmg - o1BossExpectedDmg;
 
         float numerator = (bossDiff * o2BossExpectedDmg) + (eliteDiff * o2EliteExpectedDmg) + (hallwayDiff * o2HallwayExpectedDmg);
         float denominator = o2BossExpectedDmg + o2EliteExpectedDmg + o2HallwayExpectedDmg;
