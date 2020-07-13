@@ -16,6 +16,7 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 public class GridSelectPredictionPatches {
@@ -75,26 +76,32 @@ public class GridSelectPredictionPatches {
         }
 
         private static String getPredictionString(AbstractCard c, boolean forUpgrade) {
+            Map<AbstractCard, Map<Integer, Float>> scores;
             if(forUpgrade) {
-                Random r = new Random();
-                float currentAct = FightPredictor.upgradeEvaluations.get(c).getCurrentActScore();
-                if (currentAct < 0f) {
-                    currentAct = 0.03f;
-                }
-                float nextAct = 9999f;
-                if(FightPredictor.upgradeEvaluations.get(c).hasNextActPredictions()) {
-                    nextAct = FightPredictor.upgradeEvaluations.get(c).getNextActScore();
+                scores = FightPredictor.upgradeEvaluations.getDiffs();
+            } else {
+                scores = FightPredictor.purgeEvaluations.getDiffs();
+            }
+            if (scores.containsKey(c)) {
+                Map<Integer, Float> scoresByAct = scores.get(c);
+                float currentAct = scoresByAct.get(AbstractDungeon.actNum);
+
+                float nextAct;
+                nextAct = scoresByAct.getOrDefault(AbstractDungeon.actNum + 1, 9999f);
+
+                // Almost all upgrades are always good, so set negative values to low positive value
+                if (forUpgrade) {
+                    if (currentAct < 0f) {
+                        currentAct = 0.03f;
+                    }
+
                     if (nextAct < 0f) {
                         nextAct = 0.04f;
                     }
                 }
                 return HelperMethods.formatNum(currentAct) + " | " + HelperMethods.formatNum(nextAct);
             } else {
-                float nextAct = 9999f;
-                if(FightPredictor.purgeEvaluations.get(c).hasNextActPredictions()) {
-                    nextAct = FightPredictor.purgeEvaluations.get(c).getNextActScore();
-                }
-                return HelperMethods.formatNum(FightPredictor.purgeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(nextAct);
+                return "";
             }
         }
     }

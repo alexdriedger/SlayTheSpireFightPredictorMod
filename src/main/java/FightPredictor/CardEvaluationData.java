@@ -52,13 +52,70 @@ public class CardEvaluationData {
      * @return CardEvaluationData with predictions and scores completed evaluation
      */
     public static CardEvaluationData createByAdding(List<AbstractCard> cardsToAdd, int startingAct, int endingAct) {
+        DeckManipulation dm = (deck, card) -> {
+            deck.add(card);
+        };
+        return createByFunction(cardsToAdd, dm, startingAct, endingAct);
+//        CardEvaluationData ced = new CardEvaluationData(startingAct, endingAct);
+//        Set<String> enemies = getAllEnemies(startingAct, endingAct);
+//
+//        for (AbstractCard c : cardsToAdd) {
+//            // Make deck with the card added
+//            List<AbstractCard> newDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
+//            newDeck.add(c);
+//
+//            // Run stat evaluation
+//            StatEvaluation se = new StatEvaluation(
+//                    newDeck,
+//                    AbstractDungeon.player.relics,
+//                    AbstractDungeon.player.maxHealth,
+//                    AbstractDungeon.player.currentHealth,
+//                    AbstractDungeon.ascensionLevel,
+//                    false,
+//                    enemies
+//            );
+//            ced.evals.put(c, se);
+//
+//            // Calculate score for each act by comparing to skip
+//            Map<Integer, Float> diffsByAct = new HashMap<>();
+//            for (int act = startingAct; act <= endingAct; act++) {
+//                float diff = StatEvaluation.getWeightedAvg(se, ced.skip, act);
+//                diffsByAct.put(act, diff);
+//            }
+//            ced.diffs.put(c, diffsByAct);
+//        }
+//        return ced;
+    }
+
+    public static CardEvaluationData createByRemoving(List<AbstractCard> cardsToRemove, int startingAct, int endingAct) {
+        DeckManipulation dm = (deck, card) -> {
+            deck.remove(card);
+        };
+        return createByFunction(cardsToRemove, dm, startingAct, endingAct);
+    }
+
+    public static CardEvaluationData createByUpgrading(List<AbstractCard> cardsToUpgrade, int startingAct, int endingAct) {
+        DeckManipulation dm = (deck, card) -> {
+            deck.remove(card);
+            AbstractCard upgradedCard = card.makeCopy();
+            upgradedCard.upgrade();
+            deck.add(upgradedCard);
+        };
+        return createByFunction(cardsToUpgrade, dm, startingAct, endingAct);
+    }
+
+    private interface DeckManipulation {
+        void modifyDeck(List<AbstractCard> originalDeck, AbstractCard c);
+    }
+
+    private static CardEvaluationData createByFunction(List<AbstractCard> cardsToChange, DeckManipulation dm, int startingAct, int endingAct) {
         CardEvaluationData ced = new CardEvaluationData(startingAct, endingAct);
         Set<String> enemies = getAllEnemies(startingAct, endingAct);
 
-        for (AbstractCard c : cardsToAdd) {
-            // Make deck with the card added
+        for (AbstractCard c : cardsToChange) {
+            // Modify the deck
             List<AbstractCard> newDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
-            newDeck.add(c);
+            dm.modifyDeck(newDeck, c);
 
             // Run stat evaluation
             StatEvaluation se = new StatEvaluation(
@@ -82,14 +139,6 @@ public class CardEvaluationData {
         }
         return ced;
     }
-
-//    public static CardEvaluationData createByRemoving(List<AbstractCard> cardsToRemove, int startingAct, int endingAct) {
-//
-//    }
-//
-//    public static CardEvaluationData createByUpgrading(List<AbstractCard> cardsToUpgrade, int startingAct, int endingAct) {
-//
-//    }
 
     public void addAdditionalActs(Set<Integer> actsToAdd) {
 

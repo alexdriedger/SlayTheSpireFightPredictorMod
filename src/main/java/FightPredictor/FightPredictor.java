@@ -46,17 +46,14 @@ public class FightPredictor implements
     public static Model model;
 
     public static CardEvaluationData cardChoicesEvaluations;
-    public static Map<AbstractCard, CardEvaluation> upgradeEvaluations;
-    public static Map<AbstractCard, CardEvaluation> purgeEvaluations;
+    public static CardEvaluationData upgradeEvaluations;
+    public static CardEvaluationData purgeEvaluations;
     
     public FightPredictor() {
         logger.info("Subscribe to BaseMod hooks");
         
         BaseMod.subscribe(this);
         setModID("FightPredictor");
-
-        upgradeEvaluations = new HashMap<>();
-        purgeEvaluations = new HashMap<>();
 
         logger.info("Done subscribing");
     }

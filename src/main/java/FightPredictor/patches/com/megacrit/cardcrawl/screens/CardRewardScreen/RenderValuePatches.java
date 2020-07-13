@@ -50,11 +50,16 @@ public class RenderValuePatches {
 
                 if (scores.containsKey(c)) {
                     Map<Integer, Float> scoresByAct = scores.get(c);
-                    float curActScore = scoresByAct.get(AbstractDungeon.actNum);
-                    float nextAct = 9999f;
-                    if(scoresByAct.containsKey(AbstractDungeon.actNum + 1)) {
-                         nextAct = scoresByAct.get(AbstractDungeon.actNum + 1);
+
+                    float curActScore;
+                    if (AbstractDungeon.floorNum == 16 || AbstractDungeon.floorNum == 33) {
+                        curActScore = 9999f;
+                    } else {
+                        curActScore = scoresByAct.get(AbstractDungeon.actNum);
                     }
+
+                    float nextAct;
+                    nextAct = scoresByAct.getOrDefault(AbstractDungeon.actNum + 1, 9999f);
 
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,

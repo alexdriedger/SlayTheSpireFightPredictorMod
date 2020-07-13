@@ -1,13 +1,11 @@
 package FightPredictor.patches.com.megacrit.cardcrawl.screens;
 
 import FightPredictor.FightPredictor;
-import FightPredictor.CardEvaluation;
-import FightPredictor.ml.ModelUtils;
+import FightPredictor.CardEvaluationData;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
-import com.megacrit.cardcrawl.rooms.CampfireUI;
 import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 
 import java.util.List;
@@ -29,38 +27,10 @@ public class GridPatches {
     public static void Postfix(GridCardSelectScreen __instance, CardGroup group, int numCards, String tipMsg, boolean forUpgrade, boolean forTransform, boolean canCancel, boolean forPurge) {
         if (forUpgrade) {
             List<AbstractCard> upgradeableCards = AbstractDungeon.player.masterDeck.getUpgradableCards().group;
-            FightPredictor.upgradeEvaluations.clear();
-
-            CardEvaluation skip = new CardEvaluation();
-
-            for (AbstractCard c : upgradeableCards) {
-                float[] vector = ModelUtils.getInputVectorWithUpgrade(c);
-                CardEvaluation ce = new CardEvaluation(c.cardID, vector, AbstractDungeon.actNum);
-                ce.calculateAgainst(skip, AbstractDungeon.floorNum, AbstractDungeon.actNum);
-                FightPredictor.upgradeEvaluations.put(c, ce);
-
-                FightPredictor.logger.info(ce.getCardID() + " upgrade. This Act => " + ce.getCurrentActScore());
-                if (ce.hasNextActPredictions()) {
-                    FightPredictor.logger.info(ce.getCardID() + " upgrade. Next Act => " + ce.getNextActScore());
-                }
-            }
+            FightPredictor.upgradeEvaluations = CardEvaluationData.createByUpgrading(upgradeableCards, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4));
         } else if (forPurge) {
             List<AbstractCard> purgeableCards = AbstractDungeon.player.masterDeck.getPurgeableCards().group;
-            FightPredictor.purgeEvaluations.clear();
-
-            CardEvaluation skip = new CardEvaluation();
-
-            for (AbstractCard c : purgeableCards) {
-                float[] vector = ModelUtils.getInputVectorWithRemoval(c);
-                CardEvaluation ce = new CardEvaluation(c.cardID, vector, AbstractDungeon.actNum);
-                ce.calculateAgainst(skip, AbstractDungeon.floorNum, AbstractDungeon.actNum);
-                FightPredictor.purgeEvaluations.put(c, ce);
-
-                FightPredictor.logger.info(ce.getCardID() + " removal. This Act => " + ce.getCurrentActScore());
-                if (ce.hasNextActPredictions()) {
-                    FightPredictor.logger.info(ce.getCardID() + " removal. Next Act => " + ce.getNextActScore());
-                }
-            }
+            FightPredictor.purgeEvaluations = CardEvaluationData.createByRemoving(purgeableCards, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4));
         }
     }
 }
