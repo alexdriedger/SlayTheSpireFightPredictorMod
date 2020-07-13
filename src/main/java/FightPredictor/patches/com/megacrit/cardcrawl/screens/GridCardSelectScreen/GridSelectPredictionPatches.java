@@ -1,14 +1,17 @@
 package FightPredictor.patches.com.megacrit.cardcrawl.screens.GridCardSelectScreen;
 
 import FightPredictor.FightPredictor;
+import FightPredictor.CardEvaluation;
 import FightPredictor.util.HelperMethods;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.events.city.TheLibrary;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
 import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
@@ -16,7 +19,6 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class GridSelectPredictionPatches {
     @SpirePatch(clz = GridCardSelectScreen.class, method = "render")
@@ -24,10 +26,12 @@ public class GridSelectPredictionPatches {
         //Render for all cards that aren't hovered card if a card is hovered
         @SpireInsertPatch(locator = Locator.class)
         public static void renderAllButHover(GridCardSelectScreen __instance, SpriteBatch sb, AbstractCard ___hoveredCard) {
-            if ((__instance.forUpgrade || __instance.forPurge) && AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT) {
-                for (AbstractCard c : __instance.targetGroup.group) {
-                    if (c != ___hoveredCard) {
-                        renderGridSelectPrediction(__instance, sb, c);
+            if (AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT) {
+                if((__instance.forUpgrade || __instance.forPurge) || AbstractDungeon.getCurrRoom().event instanceof TheLibrary) {
+                    for (AbstractCard c : __instance.targetGroup.group) {
+                        if (c != ___hoveredCard) {
+                            renderGridSelectPrediction(__instance, sb, c);
+                        }
                     }
                 }
             }
@@ -36,12 +40,14 @@ public class GridSelectPredictionPatches {
         //Render for hovered card and Render for all cards if no card is hovered
         @SpireInsertPatch(locator = Locator2.class)
         public static void renderHover(GridCardSelectScreen __instance, SpriteBatch sb, AbstractCard ___hoveredCard) {
-            if ((__instance.forUpgrade || __instance.forPurge) && AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT) {
-                if (___hoveredCard != null) {
-                    renderGridSelectPrediction(__instance, sb, ___hoveredCard);
-                } else {
-                    for (AbstractCard c : __instance.targetGroup.group) {
-                        renderGridSelectPrediction(__instance, sb, c);
+            if (AbstractDungeon.getCurrRoom() != null && AbstractDungeon.getCurrRoom().phase != AbstractRoom.RoomPhase.COMBAT) {
+                if((__instance.forUpgrade || __instance.forPurge) || AbstractDungeon.getCurrRoom().event instanceof TheLibrary) {
+                    if (___hoveredCard != null) {
+                        renderGridSelectPrediction(__instance, sb, ___hoveredCard);
+                    } else {
+                        for (AbstractCard c : __instance.targetGroup.group) {
+                            renderGridSelectPrediction(__instance, sb, c);
+                        }
                     }
                 }
             }
@@ -75,13 +81,20 @@ public class GridSelectPredictionPatches {
         }
 
         private static String getPredictionString(AbstractCard c, boolean forUpgrade) {
+            float nextAct = 9999f;
+
+            if(AbstractDungeon.getCurrRoom().event instanceof TheLibrary) {
+                if(FightPredictor.cardEvaluations.get(c).hasNextActPredictions()) {
+                    nextAct = FightPredictor.cardEvaluations.get(c).getNextActScore();
+                }
+                return HelperMethods.formatNum(FightPredictor.cardEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(nextAct);
+            }
+
             if(forUpgrade) {
-                Random r = new Random();
                 float currentAct = FightPredictor.upgradeEvaluations.get(c).getCurrentActScore();
                 if (currentAct < 0f) {
                     currentAct = 0.03f;
                 }
-                float nextAct = 9999f;
                 if(FightPredictor.upgradeEvaluations.get(c).hasNextActPredictions()) {
                     nextAct = FightPredictor.upgradeEvaluations.get(c).getNextActScore();
                     if (nextAct < 0f) {
@@ -90,11 +103,31 @@ public class GridSelectPredictionPatches {
                 }
                 return HelperMethods.formatNum(currentAct) + " | " + HelperMethods.formatNum(nextAct);
             } else {
-                float nextAct = 9999f;
                 if(FightPredictor.purgeEvaluations.get(c).hasNextActPredictions()) {
                     nextAct = FightPredictor.purgeEvaluations.get(c).getNextActScore();
                 }
                 return HelperMethods.formatNum(FightPredictor.purgeEvaluations.get(c).getCurrentActScore()) + " | " + HelperMethods.formatNum(nextAct);
+            }
+        }
+    }
+
+    @SpirePatch(clz = TheLibrary.class, method = "buttonEffect")
+    public static class EvaluateLibraryCards {
+        @SpireInsertPatch(locator = Locator.class, localvars = {"group"})
+        public static void patch(TheLibrary __instance, int buttonEffect, CardGroup group) {
+            CardEvaluation skip = new CardEvaluation();
+            FightPredictor.cardEvaluations.clear();
+            for(AbstractCard c : group.group) {
+                CardEvaluation ce = new CardEvaluation(c);
+                ce.calculateAgainst(skip, AbstractDungeon.floorNum, AbstractDungeon.actNum);
+                FightPredictor.cardEvaluations.put(c, ce);
+            }
+        }
+
+        private static class Locator extends SpireInsertLocator {
+            public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
+                Matcher finalMatcher = new Matcher.MethodCallMatcher(GridCardSelectScreen.class, "open");
+                return LineFinder.findInOrder(ctMethodToPatch, new ArrayList<>(), finalMatcher);
             }
         }
     }
