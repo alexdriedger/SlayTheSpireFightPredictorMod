@@ -31,7 +31,7 @@ public class GridSelectPredictionPatches {
                 CardEvaluationData evals;
                 if(__instance.forUpgrade) {
                     evals = FightPredictor.upgradeEvaluations;
-                } else if (__instance.forPurge) {
+                } else if (__instance.forPurge || __instance.forTransform) {
                     evals = FightPredictor.purgeEvaluations;
                 } else if (AbstractDungeon.getCurrRoom().event instanceof TheLibrary) {
                     evals = FightPredictor.cardChoicesEvaluations;
@@ -53,7 +53,7 @@ public class GridSelectPredictionPatches {
                 CardEvaluationData evals;
                 if(__instance.forUpgrade) {
                     evals = FightPredictor.upgradeEvaluations;
-                } else if (__instance.forPurge) {
+                } else if (__instance.forPurge || __instance.forTransform) {
                     evals = FightPredictor.purgeEvaluations;
                 } else if (AbstractDungeon.getCurrRoom().event instanceof TheLibrary) {
                     evals = FightPredictor.cardChoicesEvaluations;

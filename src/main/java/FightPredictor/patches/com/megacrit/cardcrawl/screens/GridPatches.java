@@ -28,7 +28,7 @@ public class GridPatches {
         if (forUpgrade) {
             List<AbstractCard> upgradeableCards = AbstractDungeon.player.masterDeck.getUpgradableCards().group;
             FightPredictor.upgradeEvaluations = CardEvaluationData.createByUpgrading(upgradeableCards, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4));
-        } else if (forPurge) {
+        } else if (forPurge || forTransform) {
             List<AbstractCard> purgeableCards = AbstractDungeon.player.masterDeck.getPurgeableCards().group;
             FightPredictor.purgeEvaluations = CardEvaluationData.createByRemoving(purgeableCards, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4));
         }
