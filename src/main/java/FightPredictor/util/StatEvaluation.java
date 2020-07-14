@@ -102,6 +102,30 @@ public class StatEvaluation {
         return numerator / denominator;
     }
 
+    public static float getWeightedAvgEliteAndBoss(StatEvaluation o1, StatEvaluation o2, int actNum) {
+        float o1EliteExpectedDmg = enemiesToAverage(BaseGameConstants.eliteIDs, actNum, o1.predictions);
+        float o2EliteExpectedDmg = enemiesToAverage(BaseGameConstants.eliteIDs, actNum, o2.predictions);
+
+        float o1BossExpectedDmg;
+        float o2BossExpectedDmg;
+
+        if (actNum == AbstractDungeon.actNum) {
+            o1BossExpectedDmg = o1.predictions.get(AbstractDungeon.bossKey);
+            o2BossExpectedDmg = o2.predictions.get(AbstractDungeon.bossKey);
+        } else {
+            o1BossExpectedDmg = enemiesToAverage(BaseGameConstants.bossIDs, actNum, o1.predictions);
+            o2BossExpectedDmg = enemiesToAverage(BaseGameConstants.bossIDs, actNum, o2.predictions);
+        }
+
+        float eliteDiff = o2EliteExpectedDmg - o1EliteExpectedDmg;
+        float bossDiff = o2BossExpectedDmg - o1BossExpectedDmg;
+
+        float numerator = (bossDiff * o2BossExpectedDmg) + (eliteDiff * o2EliteExpectedDmg);
+        float denominator = o2BossExpectedDmg + o2EliteExpectedDmg;
+
+        return numerator / denominator;
+    }
+
     private static float enemiesToAverage(Map<Integer, Set<String>> enemiesByAct, int act, Map<String, Float> predictions) {
         double total = enemiesByAct.get(act).stream()
                 .mapToDouble(predictions::get)

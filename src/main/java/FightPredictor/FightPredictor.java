@@ -3,6 +3,7 @@ package FightPredictor;
 import FightPredictor.ml.Model;
 import FightPredictor.ml.ModelUtils;
 import FightPredictor.patches.com.megacrit.cardcrawl.combat.CombatPredictionPatches;
+import FightPredictor.util.BaseGameConstants;
 import FightPredictor.util.FileUtils;
 import FightPredictor.util.IDCheckDontTouchPls;
 import basemod.BaseMod;
@@ -14,8 +15,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.google.gson.Gson;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
@@ -27,9 +30,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpireInitializer
 public class FightPredictor implements
@@ -140,5 +142,57 @@ public class FightPredictor implements
         logger.info("Expected health loss: " + intPrediction);
         CombatPredictionPatches.combatStartingHP = AbstractDungeon.player.currentHealth;
         CombatPredictionPatches.combatHPLossPrediction = MathUtils.round(prediction * 100);
+
+        long start = System.currentTimeMillis();
+
+        ArrayList<AbstractCard> cardPool = new ArrayList<>();
+        switch (AbstractDungeon.player.chosenClass) {
+            case IRONCLAD: CardLibrary.addRedCards(cardPool); break;
+            case THE_SILENT: CardLibrary.addGreenCards(cardPool); break;
+            case DEFECT: CardLibrary.addBlueCards(cardPool); break;
+            case WATCHER: CardLibrary.addPurpleCards(cardPool); break;
+            default: return;
+        }
+
+        List<AbstractCard> upgradedPool = cardPool.stream().map(AbstractCard::makeCopy).collect(Collectors.toList());;
+        upgradedPool.forEach(AbstractCard::upgrade);
+
+        cardPool.addAll(upgradedPool);
+
+        Set<String> elitesAndBosses = new HashSet<>(BaseGameConstants.elitesAndBossesByAct.get(AbstractDungeon.actNum));
+        if (AbstractDungeon.actNum < 4) {
+            elitesAndBosses.addAll(BaseGameConstants.elitesAndBossesByAct.get(AbstractDungeon.actNum + 1));
+        }
+
+        CardEvaluationData evaluation = CardEvaluationData.createByAdding(cardPool, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4), elitesAndBosses);
+        Map<AbstractCard, Map<Integer, Float>> diffs = evaluation.getDiffs();
+
+        Map<AbstractCard, Float> avgWeights = new HashMap<>();
+        for (AbstractCard c : diffs.keySet()) {
+            if (diffs.get(c).containsKey(AbstractDungeon.actNum + 1)) {
+                float thisAct = diffs.get(c).get(AbstractDungeon.actNum);
+                float nextAct = diffs.get(c).get(AbstractDungeon.actNum + 1);
+                avgWeights.put(c, (thisAct + nextAct) / 2.0f);
+            } else {
+                avgWeights.put(c, diffs.get(c).get(AbstractDungeon.actNum));
+            }
+        }
+
+        List<AbstractCard> cardsSortedByPrediction = avgWeights.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        Map<AbstractCard, Integer> percentiles = new HashMap<>();
+        for (int i = 0; i < cardsSortedByPrediction.size(); i++) {
+            percentiles.put(cardsSortedByPrediction.get(i), i / cardsSortedByPrediction.size());
+        }
+
+        long end = System.currentTimeMillis();
+        logger.info("Time to do predictions: " + (end - start));
+
+        for (AbstractCard c : cardsSortedByPrediction) {
+            logger.info("Card: " + c.cardID + ". Percentile: " + percentiles.get(c));
+        }
     }
 }
