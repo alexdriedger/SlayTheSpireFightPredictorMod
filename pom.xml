@@ -3,7 +3,7 @@
     <groupId>fightpredictor</groupId>
     <artifactId>FightPredictor</artifactId>
     <name>Slay-I</name>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <description>Uses machine learning to predict the outcome of fights. Evaluates cards using average damaged saved in a fight, weighted more heavily towards bosses and elites</description>
 
     <properties>
