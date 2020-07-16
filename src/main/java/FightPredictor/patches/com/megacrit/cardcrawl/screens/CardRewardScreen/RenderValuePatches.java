@@ -27,6 +27,7 @@ public class RenderValuePatches {
     private static final UIStrings uiStrings = CardCrawlGame.languagePack.getUIString(FightPredictor.CARD_REWARD_VALUE_PREDICTION_ID);
     private static final String curActPredictionText = uiStrings.TEXT[0];
     private static final String nextActPredictionText = uiStrings.TEXT[1];
+    private static final String percentileText = uiStrings.TEXT[2];
 
     @SpirePatch(clz = CardRewardScreen.class, method = "renderTwitchVotes")
     public static class RemoveTwitchVotes {
@@ -61,15 +62,34 @@ public class RenderValuePatches {
                     float nextAct;
                     nextAct = scoresByAct.getOrDefault(AbstractDungeon.actNum + 1, 9999f);
 
+                    int percentile = FightPredictor.percentiles.get(c.name);
+
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,
                             curActPredictionText + ": TAB " + formatNum(curActScore)
                                     + " NL "
-                                    + nextActPredictionText + ": TAB " + formatNum(nextAct),
+                                    + nextActPredictionText + ": TAB " + formatNum(nextAct)
+                                    + " NL "
+                                    + percentileText + ":   " + formatPercentile(percentile),
                             c.hb.x,
                             c.hb.y - heightBuffer,
                             Color.WHITE);
                 }
+            }
+        }
+
+        private static String formatPercentile(int num) {
+            if (Settings.language != Settings.GameLanguage.ENG) {
+                return Integer.toString(num);
+            }
+            if (Integer.toString(num).endsWith("1")) {
+                return num + "st";
+            } else if (Integer.toString(num).endsWith("2")) {
+                return num + "nd";
+            } else if (Integer.toString(num).endsWith("3")){
+                return num + "rd";
+            } else {
+                return num + "th";
             }
         }
 

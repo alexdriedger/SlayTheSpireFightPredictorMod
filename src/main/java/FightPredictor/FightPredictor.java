@@ -6,6 +6,7 @@ import FightPredictor.patches.com.megacrit.cardcrawl.combat.CombatPredictionPatc
 import FightPredictor.util.BaseGameConstants;
 import FightPredictor.util.FileUtils;
 import FightPredictor.util.IDCheckDontTouchPls;
+import FightPredictor.util.StatEvaluation;
 import basemod.BaseMod;
 import basemod.interfaces.EditStringsSubscriber;
 import basemod.interfaces.OnStartBattleSubscriber;
@@ -50,12 +51,16 @@ public class FightPredictor implements
     public static CardEvaluationData cardChoicesEvaluations;
     public static CardEvaluationData upgradeEvaluations;
     public static CardEvaluationData purgeEvaluations;
-    
+
+    public static Map<String, Integer> percentiles;
+
     public FightPredictor() {
         logger.info("Subscribe to BaseMod hooks");
         
         BaseMod.subscribe(this);
         setModID("FightPredictor");
+
+        percentiles = new HashMap<>();
 
         logger.info("Done subscribing");
     }
@@ -143,8 +148,13 @@ public class FightPredictor implements
         CombatPredictionPatches.combatStartingHP = AbstractDungeon.player.currentHealth;
         CombatPredictionPatches.combatHPLossPrediction = MathUtils.round(prediction * 100);
 
+        getPercentiles();
+    }
+
+    public static void getPercentiles() {
         long start = System.currentTimeMillis();
 
+        // Get the character's card pool
         ArrayList<AbstractCard> cardPool = new ArrayList<>();
         switch (AbstractDungeon.player.chosenClass) {
             case IRONCLAD: CardLibrary.addRedCards(cardPool); break;
@@ -154,45 +164,73 @@ public class FightPredictor implements
             default: return;
         }
 
+        // Add the upgraded cards to the pool
         List<AbstractCard> upgradedPool = cardPool.stream().map(AbstractCard::makeCopy).collect(Collectors.toList());;
         upgradedPool.forEach(AbstractCard::upgrade);
 
         cardPool.addAll(upgradedPool);
 
-        Set<String> elitesAndBosses = new HashSet<>(BaseGameConstants.elitesAndBossesByAct.get(AbstractDungeon.actNum));
+        // Get the enemies to predict against
+        Set<String> elitesAndBosses = new HashSet<>();
+        elitesAndBosses.addAll(BaseGameConstants.eliteIDs.get(AbstractDungeon.actNum));
+        elitesAndBosses.add(AbstractDungeon.bossKey);
         if (AbstractDungeon.actNum < 4) {
             elitesAndBosses.addAll(BaseGameConstants.elitesAndBossesByAct.get(AbstractDungeon.actNum + 1));
         }
 
-        CardEvaluationData evaluation = CardEvaluationData.createByAdding(cardPool, AbstractDungeon.actNum, Math.min(AbstractDungeon.actNum + 1, 4), elitesAndBosses);
-        Map<AbstractCard, Map<Integer, Float>> diffs = evaluation.getDiffs();
-
+        // Create skip
         Map<AbstractCard, Float> avgWeights = new HashMap<>();
-        for (AbstractCard c : diffs.keySet()) {
-            if (diffs.get(c).containsKey(AbstractDungeon.actNum + 1)) {
-                float thisAct = diffs.get(c).get(AbstractDungeon.actNum);
-                float nextAct = diffs.get(c).get(AbstractDungeon.actNum + 1);
+        StatEvaluation skip = new StatEvaluation(
+                AbstractDungeon.player.masterDeck.group,
+                AbstractDungeon.player.relics,
+                AbstractDungeon.player.maxHealth,
+                AbstractDungeon.player.currentHealth,
+                AbstractDungeon.ascensionLevel,
+                false,
+                elitesAndBosses
+        );
+
+        // Get the score for each card
+        for (AbstractCard c : cardPool) {
+            List<AbstractCard> newDeck = new ArrayList<>(AbstractDungeon.player.masterDeck.group);
+            newDeck.add(c);
+
+            StatEvaluation evalWithCard = new StatEvaluation(
+                    newDeck,
+                    AbstractDungeon.player.relics,
+                    AbstractDungeon.player.maxHealth,
+                    AbstractDungeon.player.currentHealth,
+                    AbstractDungeon.ascensionLevel,
+                    false,
+                    elitesAndBosses
+            );
+
+            // Compute the score
+            if (AbstractDungeon.actNum < 4) {
+                float thisAct = StatEvaluation.getWeightedAvgEliteAndBoss(evalWithCard, skip, AbstractDungeon.actNum);
+                float nextAct = StatEvaluation.getWeightedAvgEliteAndBoss(evalWithCard, skip, AbstractDungeon.actNum + 1);
                 avgWeights.put(c, (thisAct + nextAct) / 2.0f);
             } else {
-                avgWeights.put(c, diffs.get(c).get(AbstractDungeon.actNum));
+                avgWeights.put(c, StatEvaluation.getWeightedAvgEliteAndBoss(evalWithCard, skip, AbstractDungeon.actNum));
             }
         }
 
+        // Sort the cards by their prediction values ascending
         List<AbstractCard> cardsSortedByPrediction = avgWeights.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        Map<AbstractCard, Integer> percentiles = new HashMap<>();
+        // Map each card name to its percentile score
+        Map<String, Integer> percentiles = new HashMap<>();
         for (int i = 0; i < cardsSortedByPrediction.size(); i++) {
-            percentiles.put(cardsSortedByPrediction.get(i), i / cardsSortedByPrediction.size());
+            int per = (int) Math.round(((double) i / (double) cardsSortedByPrediction.size()) * 100);
+            percentiles.put(cardsSortedByPrediction.get(i).name, per);
         }
-
-        long end = System.currentTimeMillis();
-        logger.info("Time to do predictions: " + (end - start));
+        FightPredictor.percentiles = percentiles;
 
         for (AbstractCard c : cardsSortedByPrediction) {
-            logger.info("Card: " + c.cardID + ". Percentile: " + percentiles.get(c));
+            logger.info("Card: " + c.name + ". Percentile: " + percentiles.get(c) + ". Value: " + avgWeights.get(c));
         }
     }
 }

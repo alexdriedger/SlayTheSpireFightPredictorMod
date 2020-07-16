@@ -21,12 +21,13 @@ public class CardEvaluationData {
     // Acts that are supported. Add more acts as needed
     private final Set<Integer> supportedActs;
 
-    private CardEvaluationData(int startingAct, int endingAct, Set<String> enemies) {
+    private CardEvaluationData(int startingAct, int endingAct) {
         this.supportedActs = new HashSet<>();
         for (int act = startingAct; act <= endingAct; act++) {
             this.supportedActs.add(act);
         }
 
+        Set<String> enemies = getAllEnemies(startingAct, endingAct);
         this.skip = new StatEvaluation(
             AbstractDungeon.player.masterDeck.group,
             AbstractDungeon.player.relics,
@@ -51,14 +52,10 @@ public class CardEvaluationData {
      * @return CardEvaluationData with predictions and scores completed evaluation
      */
     public static CardEvaluationData createByAdding(List<AbstractCard> cardsToAdd, int startingAct, int endingAct) {
-        return createByAdding(cardsToAdd, startingAct, endingAct, getAllEnemies(startingAct, endingAct));
-    }
-
-    public static CardEvaluationData createByAdding(List<AbstractCard> cardsToAdd, int startingAct, int endingAct, Set<String> enemies) {
         DeckManipulation dm = (deck, card) -> {
             deck.add(card);
         };
-        return createByFunction(cardsToAdd, dm, startingAct, endingAct, enemies);
+        return createByFunction(cardsToAdd, dm, startingAct, endingAct);
     }
 
     public static CardEvaluationData createByRemoving(List<AbstractCard> cardsToRemove, int startingAct, int endingAct) {
@@ -83,12 +80,8 @@ public class CardEvaluationData {
     }
 
     private static CardEvaluationData createByFunction(List<AbstractCard> cardsToChange, DeckManipulation dm, int startingAct, int endingAct) {
+        CardEvaluationData ced = new CardEvaluationData(startingAct, endingAct);
         Set<String> enemies = getAllEnemies(startingAct, endingAct);
-        return createByFunction(cardsToChange, dm, startingAct, endingAct, enemies);
-    }
-
-    private static CardEvaluationData createByFunction(List<AbstractCard> cardsToChange, DeckManipulation dm, int startingAct, int endingAct, Set<String> enemies) {
-        CardEvaluationData ced = new CardEvaluationData(startingAct, endingAct, enemies);
 
         for (AbstractCard c : cardsToChange) {
             // Modify the deck
@@ -119,7 +112,7 @@ public class CardEvaluationData {
     }
 
     public void addAdditionalActs(Set<Integer> actsToAdd) {
-        throw new RuntimeException("Method not implemented");
+
     }
 
     private static Set<String> getAllEnemies(int startingAct, int endingAct) {
