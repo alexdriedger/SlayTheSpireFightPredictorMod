@@ -9,7 +9,6 @@ import com.megacrit.cardcrawl.ui.buttons.SkipCardButton;
 @SpirePatch(clz = SkipCardButton.class, method = SpirePatch.STATICINITIALIZER)
 public class MoveButtonsPatches {
     public static void Postfix() {
-        FightPredictor.logger.info("Skip button Y: " + SkipCardButton.TAKE_Y);
         float newValue = SkipCardButton.TAKE_Y - (25f * Settings.scale);
         ReflectionHacks.setPrivateStaticFinal(SkipCardButton.class, "TAKE_Y", newValue);
     }

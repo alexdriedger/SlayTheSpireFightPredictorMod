@@ -10,7 +10,8 @@
   "FightPredictor:Card Reward Value Prediction": {
     "TEXT": [
       "这一幕的价值",
-      "下一幕的价值"
+      "下一幕的价值",
+      "百分位"
     ]
   }
 }
