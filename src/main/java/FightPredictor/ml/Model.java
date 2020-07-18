@@ -6,9 +6,12 @@ import org.tensorflow.Tensor;
 import org.tensorflow.proto.framework.SignatureDef;
 import org.tensorflow.proto.framework.TensorInfo;
 import org.tensorflow.tools.ndarray.FloatNdArray;
+import org.tensorflow.tools.ndarray.impl.dense.FloatDenseNdArray;
 import org.tensorflow.types.TFloat32;
 import org.tensorflow.tools.ndarray.StdArrays;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -86,8 +89,33 @@ public class Model {
         }
     }
 
-    // TODO : IMPLEMENT MATRIX PREDICTION
-//    public float[] predict(float[][] inputMatrix) {
-//        throw new RuntimeException("Method not implemented");
-//    }
+
+    public float[] predict(float[][] inputMatrix) {
+        FloatNdArray fa = StdArrays.ndCopyOf(inputMatrix);
+        Tensor<TFloat32> tensorInputMatrix = TFloat32.tensorOf(fa);
+
+        // Run inference
+        try {
+            List<Tensor<?>> output = model.session()
+                    .runner()
+                    .feed(inputOp, tensorInputMatrix)
+                    .fetch(outputOp)
+                    .run();
+
+            // Get prediction
+            Tensor<?> t = output.get(0);
+            Tensor<TFloat32> tCast = (Tensor<TFloat32>) t;
+            TFloat32 tCast2 = tCast.data();
+            int size = (int) tCast.data().shape().size(0);
+            float[] returnVals = new float[size];
+            for (int i = 0; i < size; i++) {
+                returnVals[i] = tCast2.getFloat(i, 0);
+            }
+            return returnVals;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }
