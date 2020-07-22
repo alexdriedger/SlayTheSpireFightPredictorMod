@@ -62,7 +62,7 @@ public class RenderValuePatches {
                     float nextAct;
                     nextAct = scoresByAct.getOrDefault(AbstractDungeon.actNum + 1, 9999f);
 
-                    int percentile = FightPredictor.percentiles.get(c.name);
+                    int percentile = FightPredictor.percentiles.getOrDefault(c.name, Integer.MAX_VALUE);
 
                     FontHelper.renderSmartText(sb,
                             FontHelper.topPanelAmountFont,
@@ -81,6 +81,11 @@ public class RenderValuePatches {
         private static String formatPercentile(int num) {
             if (Settings.language != Settings.GameLanguage.ENG) {
                 return Integer.toString(num);
+            }
+            if (num == Integer.MAX_VALUE) {
+                return "#y----";
+            } else if (num == 11 || num == 12 || num == 13) {
+                return num + "th";
             }
             if (Integer.toString(num).endsWith("1")) {
                 return num + "st";
